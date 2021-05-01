@@ -1,0 +1,10 @@
+*.swp
+*.dll
+*.exe
+*.prof
+*.wav
+*.out
+*.BAK
+/rspwav
+/rspdetect
+/duowav
