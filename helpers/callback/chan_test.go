@@ -5,12 +5,15 @@
 package callback
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/msiner/sdrplay-go/api"
 )
 
 func TestStreamChan(t *testing.T) {
+	t.Parallel()
+
 	const numSamples = 1008
 	xi := make([]int16, numSamples)
 	xq := make([]int16, numSamples)
@@ -50,7 +53,29 @@ func TestStreamChan(t *testing.T) {
 		t.Fatal("no message available on chan")
 	}
 
-	sc.Close()
+	sc.Callback(xi, xq, &params, false)
+	sc.Callback(xi, xq, &params, false)
+	select {
+	case _, ok := <-sc.C:
+		if !ok {
+			t.Fatal("stream message channel not ok")
+		}
+	default:
+		t.Fatal("no message available on chan")
+	}
+	select {
+	case _, ok := <-sc.C:
+		if !ok {
+			t.Fatal("stream message channel not ok")
+		}
+		t.Fatal("unexpected message on chan")
+	default:
+		// good, the second Callback payload should have been dropped
+	}
+
+	if err := sc.Close(); err != nil {
+		t.Fatalf("unexpected Close failure; %v", err)
+	}
 
 	sc.Callback(xi, xq, &params, false)
 	select {
@@ -60,6 +85,14 @@ func TestStreamChan(t *testing.T) {
 		}
 	default:
 		t.Fatal("chan not closed")
+	}
+
+	err := sc.Close()
+	if err == nil {
+		t.Fatal("unexpected double Close success")
+	}
+	if !strings.Contains(err.Error(), "already closed") {
+		t.Fatalf("wrong error message; got '%s', want 'already closed'", err.Error())
 	}
 }
 

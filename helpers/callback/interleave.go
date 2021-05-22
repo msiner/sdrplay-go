@@ -11,7 +11,11 @@ func NewInterleave() func(xi, xq []int16) []int16 {
 	const scalarsPerFrame = 2
 	buf := make([]int16, 4096)
 	return func(xi, xq []int16) []int16 {
-		numScalars := len(xi) * scalarsPerFrame
+		minLen := len(xi)
+		if len(xq) < minLen {
+			minLen = len(xq)
+		}
+		numScalars := minLen * scalarsPerFrame
 		if len(buf) < numScalars {
 			next := len(buf) * 2
 			if next < numScalars {
@@ -19,11 +23,21 @@ func NewInterleave() func(xi, xq []int16) []int16 {
 			}
 			buf = make([]int16, next)
 		}
-		var bi int
-		for i := range xi {
-			buf[bi] = xi[i]
-			buf[bi+1] = xq[i]
-			bi += scalarsPerFrame
+		switch len(xi) >= len(xq) {
+		case true:
+			var bi int
+			for i := range xq {
+				buf[bi] = xi[i]
+				buf[bi+1] = xq[i]
+				bi += scalarsPerFrame
+			}
+		default:
+			var bi int
+			for i := range xi {
+				buf[bi] = xi[i]
+				buf[bi+1] = xq[i]
+				bi += scalarsPerFrame
+			}
 		}
 		return buf[:numScalars]
 	}

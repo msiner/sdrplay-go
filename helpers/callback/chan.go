@@ -102,5 +102,6 @@ func (s *StreamChan) Callback(xi, xq []int16, params *api.StreamCbParamsT, reset
 	select {
 	case s.c <- pay:
 	default:
+		// Receiver not ready or channel full; drop the payload.
 	}
 }

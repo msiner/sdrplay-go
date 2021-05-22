@@ -40,19 +40,33 @@ func NewConvertToComplex64(numBits uint) func(xi, xq []int16) []complex64 {
 	maxMag := float32(math.Pow(2, float64(numBits-1)))
 	buf := make([]complex64, 2048)
 	return func(xi, xq []int16) []complex64 {
-		if len(buf) < len(xi) {
+		minLen := len(xi)
+		if len(xq) < minLen {
+			minLen = len(xq)
+		}
+		if len(buf) < minLen {
 			next := len(buf) * 2
-			if next < len(xi) {
-				next = len(xi)
+			if next < minLen {
+				next = minLen
 			}
 			buf = make([]complex64, next)
 		}
-		for i := range xi {
-			buf[i] = complex(
-				float32(xi[i])/maxMag,
-				float32(xq[i])/maxMag,
-			)
+		switch len(xi) >= len(xq) {
+		case true:
+			for i := range xq {
+				buf[i] = complex(
+					float32(xi[i])/maxMag,
+					float32(xq[i])/maxMag,
+				)
+			}
+		default:
+			for i := range xi {
+				buf[i] = complex(
+					float32(xi[i])/maxMag,
+					float32(xq[i])/maxMag,
+				)
+			}
 		}
-		return buf[:len(xi)]
+		return buf[:minLen]
 	}
 }

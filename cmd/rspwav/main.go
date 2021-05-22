@@ -247,8 +247,8 @@ the sample rate.`,
 	// Setup callback and control state.
 	interleave := callback.NewInterleave()
 	toFloats := callback.NewConvertToFloat32(16)
-	writeInts := callback.NewWrite(*bigOpt)
-	writeFloats := callback.NewFloat32Write(*bigOpt)
+	writeInts := callback.NewWrite(order)
+	writeFloats := callback.NewFloat32Write(order)
 	detectDrops := callback.NewDropDetect()
 
 	var isWarm uint32
