@@ -11,7 +11,17 @@ func NewInterleave() func(xia, xqa, xib, xqb []int16) []int16 {
 	const scalarsPerFrame = 4
 	buf := make([]int16, 10*1024)
 	return func(xia, xqa, xib, xqb []int16) []int16 {
-		numScalars := len(xia) * scalarsPerFrame
+		minLen := len(xia)
+		if len(xqa) < minLen {
+			minLen = len(xqa)
+		}
+		if len(xib) < minLen {
+			minLen = len(xib)
+		}
+		if len(xqb) < minLen {
+			minLen = len(xqb)
+		}
+		numScalars := minLen * scalarsPerFrame
 		if len(buf) < numScalars {
 			next := len(buf) * 2
 			if next < numScalars {
@@ -23,7 +33,7 @@ func NewInterleave() func(xia, xqa, xib, xqb []int16) []int16 {
 			bi    int
 			frame []int16
 		)
-		for i := range xia {
+		for i := 0; i < minLen; i++ {
 			// The extra work here is made up for by allowing
 			// the compiler to eliminate some bounds checks because
 			// it knows the length of frame and all indexes into

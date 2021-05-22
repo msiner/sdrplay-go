@@ -7,11 +7,11 @@ package duo
 import (
 	"log"
 	"math/rand"
+	"strings"
 	"testing"
 )
 
-// TestSynchroBasic tests the basic operation of Synchro in
-// a normal scenario.
+// TestSynchroBasic tests the basic operation of Synchro.
 func TestSynchroBasic(t *testing.T) {
 	t.Parallel()
 
@@ -19,6 +19,10 @@ func TestSynchroBasic(t *testing.T) {
 	totalFrames := 0
 	numCallbacks := 0
 	numResets := 0
+	var (
+		lastEvent *SynchroEvent
+		lastMsg   string
+	)
 	f := NewSynchro(
 		numSamples,
 		func(xia, xqa, xib, xqb []int16, reset bool) {
@@ -48,7 +52,8 @@ func TestSynchroBasic(t *testing.T) {
 			}
 		},
 		func(evt SynchroEvent, msg string) {
-			log.Printf("%s: %s\n", evt, msg)
+			lastEvent = &evt
+			lastMsg = msg
 		},
 	)
 	xia := make([]int16, numSamples)
@@ -75,6 +80,75 @@ func TestSynchroBasic(t *testing.T) {
 	}
 	if totalFrames != (numSamples * numCallbacks) {
 		t.Errorf("wrong total number of frames; got %d, want %d", totalFrames, numSamples*numCallbacks)
+	}
+
+	lastEvent = nil
+	f.UpdateStreamB(xib, xqb, nil, false)
+	if lastEvent == nil {
+		t.Fatal("expected out of sync event; got none")
+	}
+	switch *lastEvent {
+	case SynchroOutOfSync:
+		want := "A has not been handled"
+		if !strings.Contains(lastMsg, want) {
+			t.Fatalf("wrong event message; got '%s', want '%s'", lastMsg, want)
+		}
+	default:
+		t.Fatalf("wrong event type; got %v, want %v", lastEvent, SynchroOutOfSync)
+	}
+
+	lastEvent = nil
+	f.UpdateStreamB(xib, xqb, nil, false)
+	if lastEvent != nil {
+		t.Fatalf("new event when already out of sync; got %v, want none", lastEvent)
+	}
+
+	lastEvent = nil
+	f.UpdateStreamA(xia, xqa, nil, false)
+	f.UpdateStreamB(xib, xqb, nil, false)
+	if lastEvent == nil {
+		t.Fatal("expected sync event; got none")
+	}
+	switch *lastEvent {
+	case SynchroSync:
+		// good
+	default:
+		t.Fatalf("wrong event type; got %v, want %v", lastEvent, SynchroSync)
+	}
+
+	lastEvent = nil
+	f.UpdateStreamA(xia, xqa, nil, false)
+	f.UpdateStreamB(xib[:10], xqb[:10], nil, false)
+	if lastEvent == nil {
+		t.Fatal("expected out of sync event; got none")
+	}
+	switch *lastEvent {
+	case SynchroOutOfSync:
+		want := "numSamplesB=10"
+		if !strings.Contains(lastMsg, want) {
+			t.Fatalf("wrong event message; got '%s', want '%s'", lastMsg, want)
+		}
+	default:
+		t.Fatalf("wrong event type; got %v, want %v", lastEvent, SynchroOutOfSync)
+	}
+
+	f.UpdateStreamA(xia, xqa, nil, false)
+	f.UpdateStreamB(xib, xqb, nil, false)
+
+	lastEvent = nil
+	f.UpdateStreamA(xia, xqa, nil, false)
+	f.UpdateStreamA(xia, xqa, nil, false)
+	if lastEvent == nil {
+		t.Fatal("expected out of sync event; got none")
+	}
+	switch *lastEvent {
+	case SynchroOutOfSync:
+		want := "B has not been handled"
+		if !strings.Contains(lastMsg, want) {
+			t.Fatalf("wrong event message; got '%s', want '%s'", lastMsg, want)
+		}
+	default:
+		t.Fatalf("wrong event type; got %v, want %v", lastEvent, SynchroOutOfSync)
 	}
 }
 

@@ -96,7 +96,12 @@ func (f *Synchro) UpdateStreamA(xi, xq []int16, params *api.StreamCbParamsT, res
 	switch {
 	case reset:
 		f.Reset()
-	case f.numSamplesA != 0 && f.numSamplesB == 0:
+	case len(xi) != len(xq):
+		if f.sync {
+			f.doEvent(SynchroOutOfSync, fmt.Sprintf("len(xia)=%d len(xqa)=%d", len(xi), len(xq)))
+		}
+		return
+	case f.numSamplesA != 0 || f.numSamplesB == 0:
 		if f.sync {
 			f.doEvent(SynchroOutOfSync, "stream B has not been handled")
 		}
@@ -122,6 +127,11 @@ func (f *Synchro) UpdateStreamA(xi, xq []int16, params *api.StreamCbParamsT, res
 
 func (f *Synchro) UpdateStreamB(xi, xq []int16, params *api.StreamCbParamsT, reset bool) {
 	switch {
+	case len(xi) != len(xq):
+		if f.sync {
+			f.doEvent(SynchroOutOfSync, fmt.Sprintf("len(xib)=%d len(xqb)=%d", len(xi), len(xq)))
+		}
+		return
 	case f.numSamplesA == 0:
 		if f.sync {
 			f.sync = false
