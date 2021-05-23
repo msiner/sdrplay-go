@@ -323,11 +323,13 @@ This will use 8 bytes of the specified payload size.`,
 	}
 
 	// Blocks until error or the context is canceled.
-	if err := session.Run(ctx, sess); err != nil {
+	err = session.Run(ctx, sess)
+	switch err {
+	case nil, context.Canceled:
+		log.Println("clean exit")
+	default:
 		return fmt.Errorf("error during session run; %v", err)
 	}
-
-	log.Println("clean exit")
 
 	return nil
 }

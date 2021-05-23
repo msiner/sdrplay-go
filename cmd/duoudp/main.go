@@ -312,12 +312,13 @@ analog bandwidths of 1.536 MHz, 600 kHz, 300 kHz, and 200 kHz.
 	}
 
 	// Blocks until error or the context is canceled.
-	if err := session.Run(ctx, sess); err != nil {
+	err = session.Run(ctx, sess)
+	switch err {
+	case nil, context.Canceled:
+		lg.Println("clean exit")
+	default:
 		return fmt.Errorf("error during session run; %v", err)
 	}
-
-	// We actually made it to the end without errors or panics.
-	lg.Println("clean exit")
 
 	return nil
 }
