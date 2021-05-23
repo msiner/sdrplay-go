@@ -169,14 +169,17 @@ func (f *Synchro) UpdateStreamB(xi, xq []int16, params *api.StreamCbParamsT, res
 	default:
 		copy(f.xib[idx:], xi)
 		n := copy(f.xqb[idx:], xq)
-		for ; idx < mod; idx++ {
+		for idx < mod {
+			idx++
 			if (idx % f.cbScalars) == 0 {
 				f.doCallback()
 			}
 		}
 		copy(f.xib, xi[n:])
 		n = copy(f.xqb, xq[n:])
-		for idx = 0; idx < n; idx++ {
+		idx = 0
+		for idx < n {
+			idx++
 			if (idx % f.cbScalars) == 0 {
 				f.doCallback()
 			}

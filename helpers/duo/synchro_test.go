@@ -5,14 +5,13 @@
 package duo
 
 import (
-	"log"
 	"math/rand"
 	"strings"
 	"testing"
 )
 
 // TestSynchroBasic tests the basic operation of Synchro.
-func TestSynchroBasic(t *testing.T) {
+func TestSynchro(t *testing.T) {
 	t.Parallel()
 
 	const numSamples = 1000
@@ -150,6 +149,42 @@ func TestSynchroBasic(t *testing.T) {
 	default:
 		t.Fatalf("wrong event type; got %v, want %v", lastEvent, SynchroOutOfSync)
 	}
+
+	f.UpdateStreamA(xia, xqa, nil, false)
+	f.UpdateStreamB(xib, xqb, nil, false)
+
+	lastEvent = nil
+	f.UpdateStreamA(xia[:10], xqa, nil, false)
+	if lastEvent == nil {
+		t.Fatal("expected out of sync event; got none")
+	}
+	switch *lastEvent {
+	case SynchroOutOfSync:
+		want := "len(xia)=10"
+		if !strings.Contains(lastMsg, want) {
+			t.Fatalf("wrong event message; got '%s', want '%s'", lastMsg, want)
+		}
+	default:
+		t.Fatalf("wrong event type; got %v, want %v", lastEvent, SynchroOutOfSync)
+	}
+
+	f.UpdateStreamA(xia, xqa, nil, false)
+	f.UpdateStreamB(xib, xqb, nil, false)
+
+	lastEvent = nil
+	f.UpdateStreamB(xib[:10], xqb, nil, false)
+	if lastEvent == nil {
+		t.Fatal("expected out of sync event; got none")
+	}
+	switch *lastEvent {
+	case SynchroOutOfSync:
+		want := "len(xib)=10"
+		if !strings.Contains(lastMsg, want) {
+			t.Fatalf("wrong event message; got '%s', want '%s'", lastMsg, want)
+		}
+	default:
+		t.Fatalf("wrong event type; got %v, want %v", lastEvent, SynchroOutOfSync)
+	}
 }
 
 // TestSynchroLong tests the operation of Synchro when it
@@ -160,10 +195,11 @@ func TestSynchroLong(t *testing.T) {
 	for i := 0; i < 1000; i++ {
 		numSamples := rand.Intn(2000) + 2
 		modVal := int16(rand.Intn(100)) + 2
+		var want int16
+
 		f := NewSynchro(
 			numSamples,
 			func(xia, xqa, xib, xqb []int16, reset bool) {
-				var want int16
 				for i := range xia {
 					if xia[i] != want {
 						t.Fatalf("wrong value at %d in xia; got %d, want %d", i, xia[i], want)
@@ -183,10 +219,10 @@ func TestSynchroLong(t *testing.T) {
 					want = (want + 1) % modVal
 				}
 			},
-			func(evt SynchroEvent, msg string) {
-				log.Printf("%s: %s\n", evt, msg)
-			},
+			nil,
 		)
+		numSamples *= 3
+		numSamples = int(modVal) * (numSamples / int(modVal))
 		xia := make([]int16, numSamples)
 		xqa := make([]int16, numSamples)
 		xib := make([]int16, numSamples)
