@@ -20,7 +20,7 @@ func TestInterleave(t *testing.T) {
 		xi[i] = int16(rand.Int31n(math.MaxInt16))
 		xq[i] = int16(rand.Int31n(math.MaxInt16))
 	}
-	inter := NewInterleave()
+	inter := NewInterleaveFn()
 	for i := 0; i < 100; i++ {
 		numSamples := rand.Intn(maxSamples)
 		x := inter(xi[:numSamples], xq[:numSamples])
@@ -49,7 +49,7 @@ func BenchmarkInterleave(b *testing.B) {
 	const maxSamples = 2048
 	xi := make([]int16, maxSamples)
 	xq := make([]int16, maxSamples)
-	inter := NewInterleave()
+	inter := NewInterleaveFn()
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
 		inter(xi, xq)

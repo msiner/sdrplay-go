@@ -176,8 +176,8 @@ analog bandwidths of 1.536 MHz, 600 kHz, 300 kHz, and 200 kHz.
 		return err
 	}
 	interleave := duo.NewInterleave()
-	detectDropsA := callback.NewDropDetect()
-	detectDropsB := callback.NewDropDetect()
+	detectDropsA := callback.NewDropDetectFn()
+	detectDropsB := callback.NewDropDetectFn()
 
 	// Use a simple atomic variable to signal warm-up complete
 	var isWarm uint32

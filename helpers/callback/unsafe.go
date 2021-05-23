@@ -11,6 +11,8 @@ import (
 	"unsafe"
 )
 
+var _ WriteFn = FastWrite
+
 // FastWrite writes the scalar sample data in x to out. It is
 // "fast" because it uses the unsafe and reflect packages to create
 // a []byte that points to the same data as x and has the appropriate

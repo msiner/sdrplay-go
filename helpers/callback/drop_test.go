@@ -22,7 +22,7 @@ func TestDropDetect(t *testing.T) {
 		NumSamples:     numSamples,
 	}
 
-	detect := NewDropDetect()
+	detect := NewDropDetectFn()
 
 	// Doesn't matter what the numbers are, always zero on reset.
 	n = detect(params, true)

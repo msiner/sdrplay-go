@@ -12,7 +12,7 @@ import (
 func TestConvertToFloat32(t *testing.T) {
 	t.Parallel()
 
-	convert := NewConvertToFloat32(17)
+	convert := NewConvertToFloat32Fn(17)
 	for i := 0; i < 100; i++ {
 		samples := make([]int16, rand.Int31n(20000))
 		for j := range samples {
@@ -41,7 +41,7 @@ func TestConvertToFloat32(t *testing.T) {
 func TestConvertToComplex64(t *testing.T) {
 	t.Parallel()
 
-	convert := NewConvertToComplex64(17)
+	convert := NewConvertToComplex64Fn(17)
 	for i := 0; i < 100; i++ {
 		xi := make([]int16, rand.Int31n(20000))
 		xq := make([]int16, len(xi))
@@ -86,7 +86,7 @@ func TestConvertToComplex64(t *testing.T) {
 
 func BenchmarkConvertToFloat32(b *testing.B) {
 	x := make([]int16, 4096)
-	conv := NewConvertToFloat32(14)
+	conv := NewConvertToFloat32Fn(14)
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
 		conv(x)
@@ -96,7 +96,7 @@ func BenchmarkConvertToFloat32(b *testing.B) {
 func BenchmarkConvertToComplex64(b *testing.B) {
 	xi := make([]int16, 2048)
 	xq := make([]int16, 2048)
-	conv := NewConvertToComplex64(14)
+	conv := NewConvertToComplex64Fn(14)
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
 		conv(xi, xq)

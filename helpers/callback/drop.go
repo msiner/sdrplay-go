@@ -10,13 +10,16 @@ import (
 	"github.com/msiner/sdrplay-go/api"
 )
 
-// NewDropDetect creates a function ath uses the specified subset of
+// DropDetectFn is a function type that uses the specified subset of
 // stream callback parameters to detect and quantify dropped samples.
-// Specifically, it uses the FirstSampleNum and NumSamples fields in
-// the callback params. To work, it must be called every callback to
-// keep the internal state valid. When reset is true, it resets all
-// internal state and reports 0 drops.
-func NewDropDetect() func(params *api.StreamCbParamsT, reset bool) uint32 {
+// It returns the number of samples dropped.
+type DropDetectFn func(params *api.StreamCbParamsT, reset bool) uint32
+
+// NewDropDetectFn creates a new DropDetectFn. The instance uses the
+// FirstSampleNum and NumSamples fields in the callback params. To work,
+// it must be called every callback to keep the internal state valid.
+// When reset is true, it resets all internal state and reports 0 drops.
+func NewDropDetectFn() DropDetectFn {
 	var (
 		valid         bool
 		lastSampleNum uint32

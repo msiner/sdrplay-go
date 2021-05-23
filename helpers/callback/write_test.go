@@ -25,7 +25,7 @@ func TestWrite(t *testing.T) {
 	t.Parallel()
 
 	testByteOrders(func(order binary.ByteOrder) {
-		write := NewWrite(order)
+		write := NewWriteFn(order)
 
 		for i := 0; i < 100; i++ {
 			samples := make([]int16, rand.Int31n(100000))
@@ -56,7 +56,7 @@ func TestFloat32Write(t *testing.T) {
 	t.Parallel()
 
 	testByteOrders(func(order binary.ByteOrder) {
-		write := NewFloat32Write(order)
+		write := NewFloat32WriteFn(order)
 
 		for i := 0; i < 100; i++ {
 			samples := make([]float32, rand.Int31n(100000))
@@ -87,7 +87,7 @@ func TestComplex64Write(t *testing.T) {
 	t.Parallel()
 
 	testByteOrders(func(order binary.ByteOrder) {
-		write := NewComplex64Write(order)
+		write := NewComplex64WriteFn(order)
 
 		for i := 0; i < 100; i++ {
 			samples := make([]complex64, rand.Int31n(100000))
@@ -116,7 +116,7 @@ func TestComplex64Write(t *testing.T) {
 
 func BenchmarkWrite(b *testing.B) {
 	x := make([]int16, 2048)
-	write := NewWrite(binary.LittleEndian)
+	write := NewWriteFn(binary.LittleEndian)
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
 		write(ioutil.Discard, x)

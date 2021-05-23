@@ -245,11 +245,11 @@ the sample rate.`,
 	}()
 
 	// Setup callback and control state.
-	interleave := callback.NewInterleave()
-	toFloats := callback.NewConvertToFloat32(16)
-	writeInts := callback.NewWrite(order)
-	writeFloats := callback.NewFloat32Write(order)
-	detectDrops := callback.NewDropDetect()
+	interleave := callback.NewInterleaveFn()
+	toFloats := callback.NewConvertToFloat32Fn(16)
+	writeInts := callback.NewWriteFn(order)
+	writeFloats := callback.NewFloat32WriteFn(order)
+	detectDrops := callback.NewDropDetectFn()
 
 	var isWarm uint32
 	go func() {

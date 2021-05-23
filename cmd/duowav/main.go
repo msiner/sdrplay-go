@@ -210,11 +210,11 @@ analog bandwidths of 1.536 MHz, 600 kHz, 300 kHz, and 200 kHz.
 
 	// Setup callback and control state.
 	interleave := duo.NewInterleave()
-	toFloats := callback.NewConvertToFloat32(16)
-	writeInts := callback.NewWrite(order)
-	writeFloats := callback.NewFloat32Write(order)
-	detectDropsA := callback.NewDropDetect()
-	detectDropsB := callback.NewDropDetect()
+	toFloats := callback.NewConvertToFloat32Fn(16)
+	writeInts := callback.NewWriteFn(order)
+	writeFloats := callback.NewFloat32WriteFn(order)
+	detectDropsA := callback.NewDropDetectFn()
+	detectDropsB := callback.NewDropDetectFn()
 
 	var isWarm uint32
 	go func() {

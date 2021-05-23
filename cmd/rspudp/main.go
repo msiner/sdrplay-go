@@ -206,8 +206,8 @@ This will use 8 bytes of the specified payload size.`,
 	if err != nil {
 		return err
 	}
-	interleave := callback.NewInterleave()
-	detectDrops := callback.NewDropDetect()
+	interleave := callback.NewInterleaveFn()
+	detectDrops := callback.NewDropDetectFn()
 	var isWarm uint32
 	go func() {
 		time.Sleep(warm)

@@ -4,10 +4,20 @@
 
 package callback
 
-// NewInterleave creates a function that returns a slice with the
-// provided samples interleaved. It uses a persistent buffer to avoid
-// extra allocations.
-func NewInterleave() func(xi, xq []int16) []int16 {
+// InterleaveFn is a function type that returns a slice with the
+// provided component signal sample scalars interleaved into a single
+// slice. The xi slice contains the real component and the xq slice
+// contains the imaginary component. The lengths of xi and xq should be
+// equal. The length of the resulting slice is twice the length of the
+// shortest of the lengths of xi and xq.
+type InterleaveFn func(xi, xq []int16) []int16
+
+// NewInterleaveFn creates a new InterleaveFn.
+//
+// The function uses an internal persistent buffer to minimize allocations.
+// The returned slice is a slice of that internal buffer and should not be
+// modified or stored.
+func NewInterleaveFn() InterleaveFn {
 	const scalarsPerFrame = 2
 	buf := make([]int16, 4096)
 	return func(xi, xq []int16) []int16 {
