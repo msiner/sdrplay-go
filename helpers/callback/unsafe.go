@@ -11,6 +11,8 @@ import (
 	"unsafe"
 )
 
+// FastWrite should have the same function signature as WriteFn to allow
+// interchangeable use.
 var _ WriteFn = FastWrite
 
 // FastWrite writes the scalar sample data in x to out. It is
