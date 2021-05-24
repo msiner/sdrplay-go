@@ -30,7 +30,7 @@ func ExampleFastWrite() {
 	b := buf.Bytes()
 	var order binary.ByteOrder = binary.LittleEndian
 	// We know first sample is 0x0001. In big-endian, first byte will
-	// be most-significant and, therefore, zero.
+	// be the most-significant and, therefore, zero.
 	if b[0] == 0 {
 		order = binary.BigEndian
 	}
