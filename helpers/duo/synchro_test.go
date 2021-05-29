@@ -5,6 +5,7 @@
 package duo
 
 import (
+	"fmt"
 	"math/rand"
 	"strings"
 	"testing"
@@ -53,6 +54,7 @@ func TestSynchro(t *testing.T) {
 		func(evt SynchroEvent, msg string) {
 			lastEvent = &evt
 			lastMsg = msg
+			fmt.Println(evt, msg)
 		},
 	)
 	xia := make([]int16, numSamples)

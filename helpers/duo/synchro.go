@@ -93,15 +93,16 @@ func (f *Synchro) doEvent(evt SynchroEvent, msg string) {
 }
 
 func (f *Synchro) UpdateStreamA(xi, xq []int16, params *api.StreamCbParamsT, reset bool) {
-	switch {
-	case reset:
+	if reset {
 		f.Reset()
+	}
+	switch {
 	case len(xi) != len(xq):
 		if f.sync {
 			f.doEvent(SynchroOutOfSync, fmt.Sprintf("len(xia)=%d len(xqa)=%d", len(xi), len(xq)))
 		}
 		return
-	case f.numSamplesA != 0 || f.numSamplesB == 0:
+	case f.numSamplesA != 0:
 		if f.sync {
 			f.doEvent(SynchroOutOfSync, "stream B has not been handled")
 		}
@@ -155,25 +156,35 @@ func (f *Synchro) UpdateStreamB(xi, xq []int16, params *api.StreamCbParamsT, res
 	f.numSamplesB = len(xi)
 	idx := f.rxIdx
 	mod := len(f.xia)
-	rem := len(xi)
 
-	for rem > 0 {
-		toNext := (((idx / f.cbScalars) * f.cbScalars) + f.cbScalars) - idx
-		switch toNext >= rem {
-		case true:
-			end := idx + toNext
-			copy(f.xib[idx:end], xi)
-			copy(f.xqb[idx:end], xq)
-			idx = end
-			rem -= toNext
-			f.doCallback()
-		default:
-			copy(f.xib[idx:], xi)
-			copy(f.xqb[idx:], xq)
-			idx += len(xi)
-			rem -= len(xi)
+	switch idx+len(xi) < mod {
+	case true:
+		copy(f.xib[idx:], xi)
+		copy(f.xqb[idx:], xq)
+		for range xi {
+			idx++
+			if (idx % f.cbScalars) == 0 {
+				f.doCallback()
+			}
 		}
-		idx %= mod
+	default:
+		copy(f.xib[idx:], xi)
+		n := copy(f.xqb[idx:], xq)
+		for idx < mod {
+			idx++
+			if (idx % f.cbScalars) == 0 {
+				f.doCallback()
+			}
+		}
+		copy(f.xib, xi[n:])
+		n = copy(f.xqb, xq[n:])
+		idx = 0
+		for idx < n {
+			idx++
+			if (idx % f.cbScalars) == 0 {
+				f.doCallback()
+			}
+		}
 	}
 
 	f.rxIdx = idx
