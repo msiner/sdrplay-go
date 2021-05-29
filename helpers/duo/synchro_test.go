@@ -248,9 +248,12 @@ func TestSynchroLong(t *testing.T) {
 }
 
 func BenchmarkSynchro(b *testing.B) {
-	const numSamples = 1000
+	const (
+		cbSamples  = 4000
+		numSamples = 1000
+	)
 	f := NewSynchro(
-		numSamples,
+		cbSamples,
 		func(xia, xqa, xib, xqb []int16, reset bool) {
 		},
 		func(evt SynchroEvent, msg string) {
