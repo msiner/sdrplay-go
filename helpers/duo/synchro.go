@@ -157,34 +157,25 @@ func (f *Synchro) UpdateStreamB(xi, xq []int16, params *api.StreamCbParamsT, res
 	idx := f.rxIdx
 	mod := len(f.xia)
 
-	switch idx+len(xi) < mod {
-	case true:
-		copy(f.xib[idx:], xi)
-		copy(f.xqb[idx:], xq)
-		for range xi {
-			idx++
-			if (idx % f.cbScalars) == 0 {
-				f.doCallback()
-			}
+	rem := len(xi)
+	for rem > 0 {
+		toNext := (((idx / f.cbScalars) * f.cbScalars) + f.cbScalars) - idx
+		bufIdx := len(xi) - rem
+		switch toNext > rem {
+		case true:
+			copy(f.xib[idx:], xi[bufIdx:])
+			copy(f.xqb[idx:], xq[bufIdx:])
+			idx += rem
+			rem -= rem
+		default:
+			end := idx + toNext
+			copy(f.xib[idx:end], xi[bufIdx:])
+			copy(f.xqb[idx:end], xq[bufIdx:])
+			idx = end
+			rem -= toNext
+			f.doCallback()
 		}
-	default:
-		copy(f.xib[idx:], xi)
-		n := copy(f.xqb[idx:], xq)
-		for idx < mod {
-			idx++
-			if (idx % f.cbScalars) == 0 {
-				f.doCallback()
-			}
-		}
-		copy(f.xib, xi[n:])
-		n = copy(f.xqb, xq[n:])
-		idx = 0
-		for idx < n {
-			idx++
-			if (idx % f.cbScalars) == 0 {
-				f.doCallback()
-			}
-		}
+		idx %= mod
 	}
 
 	f.rxIdx = idx
