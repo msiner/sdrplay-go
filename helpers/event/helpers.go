@@ -1,3 +1,7 @@
+// Copyright 2021 Mark Siner. All rights reserved.
+// Use of this source code is governed by a MIT-style
+// license that can be found in the LICENSE file.
+
 package event
 
 import (
@@ -12,8 +16,8 @@ type Logger interface {
 	Printf(format string, v ...interface{})
 }
 
-type Handler func(d *api.DeviceT, a api.API, e api.EventT, t api.TunerSelectT, p *api.EventParamsT) error
-
+// GetRelatedParams is a helper function to select and extract the
+// device/channel parameters related to the event information.
 func GetRelatedParams(d *api.DeviceT, a api.API, e api.EventT, t api.TunerSelectT, p *api.EventParamsT) (*api.DeviceParamsT, []*api.RxChannelParamsT, error) {
 	devParams, err := a.LoadDeviceParams(d.Dev)
 	if err != nil {
@@ -38,10 +42,15 @@ func GetRelatedParams(d *api.DeviceT, a api.API, e api.EventT, t api.TunerSelect
 	return devParams, rxParams, nil
 }
 
+// GetRelatedParamsMsg is a wrapper around GetRelatedParams for easy
+// use with EventChan.
 func GetRelatedParamsMsg(d *api.DeviceT, a api.API, evt EventMsg) (*api.DeviceParamsT, []*api.RxChannelParamsT, error) {
 	return GetRelatedParams(d, a, evt.EventId, evt.Tuner, &evt.Params)
 }
 
+// HandlePowerOverloadChange is a helper function to automatically handle
+// power overload events by reducing gain, if possible, on the affected
+// channel.
 func HandlePowerOverloadChange(d *api.DeviceT, a api.API, e api.EventT, t api.TunerSelectT, p *api.EventParamsT, lg Logger, adjust bool) error {
 	if e != api.PowerOverloadChange {
 		return nil
@@ -85,10 +94,14 @@ func HandlePowerOverloadChange(d *api.DeviceT, a api.API, e api.EventT, t api.Tu
 	return nil
 }
 
+// HandlePowerOverloadChangeMsg is a wrapper around HandlePowerOverloadChange
+// for easy use with EventChan.
 func HandlePowerOverloadChangeMsg(d *api.DeviceT, a api.API, evt EventMsg, lg Logger, adjust bool) error {
 	return HandlePowerOverloadChange(d, a, evt.EventId, evt.Tuner, &evt.Params, lg, adjust)
 }
 
+// LogEvent is a helper function for logging a basic message representing
+// the provided event.
 func LogEvent(e api.EventT, t api.TunerSelectT, p *api.EventParamsT, lg Logger) {
 	if lg == nil {
 		return
@@ -113,6 +126,7 @@ func LogEvent(e api.EventT, t api.TunerSelectT, p *api.EventParamsT, lg Logger) 
 	}
 }
 
+// LogEventMsg is a wrapper around LogEvent for use with EventChan.
 func LogEventMsg(evt EventMsg, lg Logger) {
 	LogEvent(evt.EventId, evt.Tuner, &evt.Params, lg)
 }

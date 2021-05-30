@@ -4,10 +4,22 @@
 
 package duo
 
-// NewInterleave creates a function that returns a slice with the
-// provided samples interleaved. It uses a persistent buffer to avoid
-// extra allocations.
-func NewInterleave() func(xia, xqa, xib, xqb []int16) []int16 {
+// InterleaveFn is a function type that returns a slice with the
+// provided component signal sample scalars interleaved into a single
+// slice. The xia slice contains the real component of stream A, the
+// xqa slice contains the imaginary component of stream A, the xib
+// slice contains the real component of stream B, the xqa slice contains
+// the imaginary component of stream B. The lengths of xia, xqa, xib,
+// and xqb should be equal. The length of the resulting slice is four
+// times the length of the shortest of the lengths of all provided slices.
+type InterleaveFn func(xia, xqa, xib, xqb []int16) []int16
+
+// NewInterleaveFn creates a new InterleaveFn.
+//
+// The function uses an internal persistent buffer to minimize allocations.
+// The returned slice is a slice of that internal buffer and should not be
+// modified or stored.
+func NewInterleave() InterleaveFn {
 	const scalarsPerFrame = 4
 	buf := make([]int16, 10*1024)
 	return func(xia, xqa, xib, xqb []int16) []int16 {
