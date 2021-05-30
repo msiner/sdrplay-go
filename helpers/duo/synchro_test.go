@@ -226,7 +226,7 @@ func TestSynchroLong(t *testing.T) {
 		)
 		var (
 			total  int
-			target int   = bufSize * 21
+			target int   = bufSize * 42
 			valia  int16 = wantia
 			valqa  int16 = wantqa
 			valib  int16 = wantib
