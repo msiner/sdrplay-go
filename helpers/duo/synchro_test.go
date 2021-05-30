@@ -192,59 +192,73 @@ func TestSynchro(t *testing.T) {
 // TestSynchroLong tests the operation of Synchro when it
 // is forced to wrap around its internal buffer.
 func TestSynchroLong(t *testing.T) {
-	t.Parallel()
-
 	for i := 0; i < 1000; i++ {
-		numSamples := rand.Intn(2000) + 2
-		modVal := int16(rand.Intn(100)) + 2
-		var want int16
-
+		var (
+			wantia int16 = int16(rand.Int())
+			wantqa int16 = int16(rand.Int())
+			wantib int16 = int16(rand.Int())
+			wantqb int16 = int16(rand.Int())
+		)
+		bufSize := rand.Intn(1000) + 2
 		f := NewSynchro(
-			numSamples,
+			bufSize,
 			func(xia, xqa, xib, xqb []int16, reset bool) {
 				for i := range xia {
-					if xia[i] != want {
-						t.Fatalf("wrong value at %d in xia; got %d, want %d", i, xia[i], want)
+					if xia[i] != wantia {
+						t.Fatalf("wrong value at %d in xia; got %d, want %d", i, xia[i], wantia)
 					}
-					want = (want + 1) % modVal
-					if xqa[i] != want {
-						t.Fatalf("wrong value at %d in xqa; got %d, want %d", i, xqa[i], want)
+					wantia++
+					if xqa[i] != wantqa {
+						t.Fatalf("wrong value at %d in xqa; got %d, want %d", i, xqa[i], wantqa)
 					}
-					want = (want + 1) % modVal
-					if xib[i] != want {
-						t.Fatalf("wrong value at %d in xib; got %d, want %d", i, xib[i], want)
+					wantqa++
+					if xib[i] != wantib {
+						t.Fatalf("wrong value at %d in xib; got %d, want %d", i, xib[i], wantib)
 					}
-					want = (want + 1) % modVal
-					if xqb[i] != want {
-						t.Fatalf("wrong value at %d in xqb; got %d, want %d", i, xqb[i], want)
+					wantib++
+					if xqb[i] != wantqb {
+						t.Fatalf("wrong value at %d in xqb; got %d, want %d", i, xqb[i], wantqb)
 					}
-					want = (want + 1) % modVal
+					wantqb++
 				}
 			},
 			nil,
 		)
-		numSamples *= 3
-		numSamples = int(modVal) * (numSamples / int(modVal))
-		xia := make([]int16, numSamples)
-		xqa := make([]int16, numSamples)
-		xib := make([]int16, numSamples)
-		xqb := make([]int16, numSamples)
-		var val int16
-		for i := 0; i < numSamples; i++ {
-			xia[i] = val
-			val = (val + 1) % modVal
-			xqa[i] = val
-			val = (val + 1) % modVal
-			xib[i] = val
-			val = (val + 1) % modVal
-			xqb[i] = val
-			val = (val + 1) % modVal
+		var (
+			total  int
+			target int   = bufSize * 21
+			valia  int16 = wantia
+			valqa  int16 = wantqa
+			valib  int16 = wantib
+			valqb  int16 = wantqb
+		)
+		const maxSamples = 2000
+		xia := make([]int16, maxSamples)
+		xqa := make([]int16, maxSamples)
+		xib := make([]int16, maxSamples)
+		xqb := make([]int16, maxSamples)
+		update := func() int {
+			n := rand.Intn(maxSamples)
+			for i := 0; i < n; i++ {
+				xia[i] = valia
+				valia++
+				xqa[i] = valqa
+				valqa++
+				xib[i] = valib
+				valib++
+				xqb[i] = valqb
+				valqb++
+			}
+			total += n
+			return n
 		}
-		f.UpdateStreamA(xia, xqa, nil, true)
-		f.UpdateStreamB(xib, xqb, nil, true)
-		for i := 0; i < 100; i++ {
-			f.UpdateStreamA(xia, xqa, nil, false)
-			f.UpdateStreamB(xib, xqb, nil, false)
+		n := update()
+		f.UpdateStreamA(xia[:n], xqa[:n], nil, true)
+		f.UpdateStreamB(xib[:n], xqb[:n], nil, true)
+		for total < target {
+			n = update()
+			f.UpdateStreamA(xia[:n], xqa[:n], nil, false)
+			f.UpdateStreamB(xib[:n], xqb[:n], nil, false)
 		}
 	}
 }
