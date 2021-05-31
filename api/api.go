@@ -14,8 +14,6 @@ const (
 	MAX_ROOT_NM_LEN = 32
 )
 
-type Handle uintptr
-
 type HWVersion uint8
 
 const (

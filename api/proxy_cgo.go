@@ -18,7 +18,7 @@ import (
 // StreamCallbackT function.
 //
 //export streamACallback
-func streamACallback(xi, xq, params uintptr, numSamples, reset uint32, cbContext uintptr) {
+func streamACallback(xi, xq, params unsafe.Pointer, numSamples, reset uint32, cbContext unsafe.Pointer) {
 	cbMutex.Lock()
 	cb := streamACbFn
 	cbMutex.Unlock()
@@ -33,20 +33,20 @@ func streamACallback(xi, xq, params uintptr, numSamples, reset uint32, cbContext
 		cbParams *StreamCbParamsT
 	)
 
-	if xi != 0 && xq != 0 && numSamples > 0 {
+	if xi != nil && xq != nil && numSamples > 0 {
 		hxi := (*reflect.SliceHeader)(unsafe.Pointer(&sxi))
 		hxi.Cap = int(numSamples)
 		hxi.Len = int(numSamples)
-		hxi.Data = xi
+		hxi.Data = (uintptr)(xi)
 
 		hxq := (*reflect.SliceHeader)(unsafe.Pointer(&sxq))
 		hxq.Cap = int(numSamples)
 		hxq.Len = int(numSamples)
-		hxq.Data = xq
+		hxq.Data = (uintptr)(xq)
 	}
 
-	if params != 0 {
-		cbParams = (*StreamCbParamsT)(unsafe.Pointer(params))
+	if params != nil {
+		cbParams = (*StreamCbParamsT)(params)
 	}
 
 	cb(sxi, sxq, cbParams, reset != 0)
@@ -57,7 +57,7 @@ func streamACallback(xi, xq, params uintptr, numSamples, reset uint32, cbContext
 // StreamCallbackT function.
 //
 //export streamBCallback
-func streamBCallback(xi, xq, params uintptr, numSamples, reset uint32, cbContext uintptr) {
+func streamBCallback(xi, xq, params unsafe.Pointer, numSamples, reset uint32, cbContext unsafe.Pointer) {
 	cbMutex.Lock()
 	cb := streamBCbFn
 	cbMutex.Unlock()
@@ -72,20 +72,20 @@ func streamBCallback(xi, xq, params uintptr, numSamples, reset uint32, cbContext
 		cbParams *StreamCbParamsT
 	)
 
-	if xi != 0 && xq != 0 && numSamples > 0 {
+	if xi != nil && xq != nil && numSamples > 0 {
 		hxi := (*reflect.SliceHeader)(unsafe.Pointer(&sxi))
 		hxi.Cap = int(numSamples)
 		hxi.Len = int(numSamples)
-		hxi.Data = xi
+		hxi.Data = (uintptr)(xi)
 
 		hxq := (*reflect.SliceHeader)(unsafe.Pointer(&sxq))
 		hxq.Cap = int(numSamples)
 		hxq.Len = int(numSamples)
-		hxq.Data = xq
+		hxq.Data = (uintptr)(xq)
 	}
 
-	if params != 0 {
-		cbParams = (*StreamCbParamsT)(unsafe.Pointer(params))
+	if params != nil {
+		cbParams = (*StreamCbParamsT)(params)
 	}
 
 	cb(sxi, sxq, cbParams, reset != 0)
@@ -96,7 +96,7 @@ func streamBCallback(xi, xq, params uintptr, numSamples, reset uint32, cbContext
 // EventCallbackT function.
 //
 //export eventCallback
-func eventCallback(eventId, tuner int32, params, cbContext uintptr) {
+func eventCallback(eventId, tuner int32, params, cbContext unsafe.Pointer) {
 	cbMutex.Lock()
 	cb := eventCbFn
 	cbMutex.Unlock()
@@ -105,8 +105,8 @@ func eventCallback(eventId, tuner int32, params, cbContext uintptr) {
 	}
 
 	var evParams *EventParamsT
-	if params != 0 {
-		evParams = (*EventParamsT)(unsafe.Pointer(params))
+	if params != nil {
+		evParams = (*EventParamsT)(params)
 	}
 
 	cb(EventT(eventId), TunerSelectT(tuner), evParams)

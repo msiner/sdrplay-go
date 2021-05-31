@@ -28,6 +28,9 @@ import (
 	"unsafe"
 )
 
+// Handle is a session handle provided by the C API.
+type Handle unsafe.Pointer
+
 var apiMutex sync.Mutex
 
 type Impl struct{}

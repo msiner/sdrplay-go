@@ -22,9 +22,9 @@ func BenchmarkHandleCallback(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		handleCallback(
 			cb,
-			(uintptr)(unsafe.Pointer(&xi[0])),
-			(uintptr)(unsafe.Pointer(&xq[0])),
-			(uintptr)(unsafe.Pointer(&params)),
+			unsafe.Pointer(&xi[0]),
+			unsafe.Pointer(&xq[0]),
+			unsafe.Pointer(&params),
 			uintptr(numSamples),
 			0,
 		)
@@ -76,9 +76,9 @@ func TestHandleCallback(t *testing.T) {
 
 	handleCallback(
 		cb,
-		(uintptr)(unsafe.Pointer(&xi[0])),
-		(uintptr)(unsafe.Pointer(&xq[0])),
-		(uintptr)(unsafe.Pointer(&params)),
+		unsafe.Pointer(&xi[0]),
+		unsafe.Pointer(&xq[0]),
+		unsafe.Pointer(&params),
 		uintptr(numSamples),
 		1,
 	)
@@ -100,14 +100,14 @@ func TestHandleCallback(t *testing.T) {
 		}
 	}
 
-	handleCallback(cb, 0, 0, 0, 0, 0)
+	handleCallback(cb, nil, nil, nil, 0, 0)
 
 	if !called {
 		t.Error("callback not called on zero samples")
 	}
 
 	called = false
-	handleCallback(cb, 0, 0, 0, uintptr(numSamples), 0)
+	handleCallback(cb, nil, nil, nil, uintptr(numSamples), 0)
 
 	if !called {
 		t.Error("callback not called on zero samples and positive numSamples")

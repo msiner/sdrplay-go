@@ -13,21 +13,21 @@ void cgoStreamACallback(
 	short *xi, short *xq, sdrplay_api_StreamCbParamsT *params,
 	unsigned int numSamples, unsigned int reset, void *cbContext
 ) {
-	streamACallback((GoUintptr)xi, (GoUintptr)xq, (GoUintptr)params, (GoUint32)numSamples, (GoUint32)reset, (GoUintptr)cbContext);
+	streamACallback(xi, xq, params, (GoUint32)numSamples, (GoUint32)reset, cbContext);
 }
 
 void cgoStreamBCallback(
 	short *xi, short *xq, sdrplay_api_StreamCbParamsT *params,
 	unsigned int numSamples, unsigned int reset, void *cbContext
 ) {
-	streamBCallback((GoUintptr)xi, (GoUintptr)xq, (GoUintptr)params, (GoUint32)numSamples, (GoUint32)reset, (GoUintptr)cbContext);
+	streamBCallback(xi, xq, params, (GoUint32)numSamples, (GoUint32)reset, cbContext);
 }
 
 void cgoEventCallback(
 	sdrplay_api_EventT eventId, sdrplay_api_TunerSelectT tuner,
 	sdrplay_api_EventParamsT *params, void *cbContext
 ) {
-	eventCallback((GoInt32)eventId, (GoInt32)tuner, (GoUintptr)params, (GoUintptr)cbContext);
+	eventCallback((GoInt32)eventId, (GoInt32)tuner, params, cbContext);
 }
 
 sdrplay_api_ErrT wrapper_api_Init(HANDLE dev) {

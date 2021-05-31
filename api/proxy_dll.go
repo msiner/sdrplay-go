@@ -13,7 +13,7 @@ import (
 // streamACallback is the global callback handler/proxy that routes
 // stream A callbacks from sdrplay_api to a user-defined Go
 // StreamCallbackT function.
-func streamACallback(xi, xq, params, numSamples, reset, cbContext uintptr) uintptr {
+func streamACallback(xi, xq, params unsafe.Pointer, numSamples, reset uintptr, cbContext unsafe.Pointer) uintptr {
 	cbMutex.Lock()
 	cb := streamACbFn
 	cbMutex.Unlock()
@@ -28,20 +28,20 @@ func streamACallback(xi, xq, params, numSamples, reset, cbContext uintptr) uintp
 		cbParams *StreamCbParamsT
 	)
 
-	if xi != 0 && xq != 0 && numSamples > 0 {
+	if xi != nil && xq != nil && numSamples > 0 {
 		hxi := (*reflect.SliceHeader)(unsafe.Pointer(&sxi))
 		hxi.Cap = int(numSamples)
 		hxi.Len = int(numSamples)
-		hxi.Data = xi
+		hxi.Data = (uintptr)(xi)
 
 		hxq := (*reflect.SliceHeader)(unsafe.Pointer(&sxq))
 		hxq.Cap = int(numSamples)
 		hxq.Len = int(numSamples)
-		hxq.Data = xq
+		hxq.Data = (uintptr)(xq)
 	}
 
-	if params != 0 {
-		cbParams = (*StreamCbParamsT)(unsafe.Pointer(params))
+	if params != nil {
+		cbParams = (*StreamCbParamsT)(params)
 	}
 
 	cb(sxi, sxq, cbParams, reset != 0)
@@ -52,7 +52,7 @@ func streamACallback(xi, xq, params, numSamples, reset, cbContext uintptr) uintp
 // streamBCallback is the global callback handler/proxy that routes
 // stream B callbacks from sdrplay_api to a user-defined Go
 // StreamCallbackT function.
-func streamBCallback(xi, xq, params, numSamples, reset, cbContext uintptr) uintptr {
+func streamBCallback(xi, xq, params unsafe.Pointer, numSamples, reset uintptr, cbContext unsafe.Pointer) uintptr {
 	cbMutex.Lock()
 	cb := streamBCbFn
 	cbMutex.Unlock()
@@ -67,20 +67,20 @@ func streamBCallback(xi, xq, params, numSamples, reset, cbContext uintptr) uintp
 		cbParams *StreamCbParamsT
 	)
 
-	if xi != 0 && xq != 0 && numSamples > 0 {
+	if xi != nil && xq != nil && numSamples > 0 {
 		hxi := (*reflect.SliceHeader)(unsafe.Pointer(&sxi))
 		hxi.Cap = int(numSamples)
 		hxi.Len = int(numSamples)
-		hxi.Data = xi
+		hxi.Data = (uintptr)(xi)
 
 		hxq := (*reflect.SliceHeader)(unsafe.Pointer(&sxq))
 		hxq.Cap = int(numSamples)
 		hxq.Len = int(numSamples)
-		hxq.Data = xq
+		hxq.Data = (uintptr)(xq)
 	}
 
-	if params != 0 {
-		cbParams = (*StreamCbParamsT)(unsafe.Pointer(params))
+	if params != nil {
+		cbParams = (*StreamCbParamsT)(params)
 	}
 
 	cb(sxi, sxq, cbParams, reset != 0)
@@ -91,7 +91,7 @@ func streamBCallback(xi, xq, params, numSamples, reset, cbContext uintptr) uintp
 // eventCallback is the global callback handler/proxy that routes
 // event callbacks from sdrplay_api to a user-defined Go
 // EventCallbackT function.
-func eventCallback(eventId, tuner, params, cbContext uintptr) uintptr {
+func eventCallback(eventId, tuner uintptr, params, cbContext unsafe.Pointer) uintptr {
 	cbMutex.Lock()
 	cb := eventCbFn
 	cbMutex.Unlock()
@@ -100,7 +100,7 @@ func eventCallback(eventId, tuner, params, cbContext uintptr) uintptr {
 	}
 
 	var evParams *EventParamsT
-	if params != 0 {
+	if params != nil {
 		evParams = (*EventParamsT)(unsafe.Pointer(params))
 	}
 

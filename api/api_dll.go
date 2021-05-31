@@ -14,6 +14,12 @@ import (
 	"golang.org/x/sys/windows"
 )
 
+// Handle is a session handle provided by the C API. Using the
+// windows package DLL loading, we are generally stuck with
+// uintptr as a representation for data passed to and returned
+// from functions.
+type Handle uintptr
+
 var (
 	dll                                           = windows.NewLazyDLL("sdrplay_api")
 	sdrplay_api_Open                              = dll.NewProc("sdrplay_api_Open")
@@ -195,6 +201,9 @@ func (Impl) GetLastError(dev *DeviceT) ErrorInfoT {
 	if e == 0 {
 		return ErrorInfoT{}
 	}
+	// go vet doesn't like this, but it is the only way we can do
+	// this since sdrplay_api_GetLastError actually returns a
+	// pointer, but Proc returns uintptr.
 	return *(*ErrorInfoT)(unsafe.Pointer(e))
 }
 
@@ -234,7 +243,7 @@ func (Impl) LoadDeviceParams(dev Handle) (*DeviceParamsT, error) {
 
 	res := DeviceParamsT{}
 
-	var ptr uintptr
+	var ptr unsafe.Pointer
 	e, _, _ := sdrplay_api_GetDeviceParams.Call(
 		uintptr(dev),
 		uintptr(unsafe.Pointer(&ptr)),
@@ -243,11 +252,11 @@ func (Impl) LoadDeviceParams(dev Handle) (*DeviceParamsT, error) {
 	if et != Success {
 		return nil, et
 	}
-	if ptr == 0 {
+	if ptr == nil {
 		return nil, errors.New("got nil pointer from GetDeviceParams")
 	}
 
-	params := *(*DeviceParamsT)(unsafe.Pointer(ptr))
+	params := *(*DeviceParamsT)(ptr)
 	if params.DevParams != nil {
 		// Need to create a copy first because the compiler will
 		// optimize away the seemingly redundant &*foo.
@@ -275,7 +284,7 @@ func (Impl) StoreDeviceParams(dev Handle, newParams *DeviceParamsT) error {
 	apiMutex.Lock()
 	defer apiMutex.Unlock()
 
-	var ptr uintptr
+	var ptr unsafe.Pointer
 	e, _, _ := sdrplay_api_GetDeviceParams.Call(
 		uintptr(dev),
 		uintptr(unsafe.Pointer(&ptr)),
@@ -284,7 +293,7 @@ func (Impl) StoreDeviceParams(dev Handle, newParams *DeviceParamsT) error {
 	if et != Success {
 		return et
 	}
-	if ptr == 0 {
+	if ptr == nil {
 		return errors.New("got nil pointer from GetDeviceParams")
 	}
 

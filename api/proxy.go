@@ -43,27 +43,27 @@ func unregisterCallbacks(dev Handle) {
 // So the code is duplicated in each handler. This function remains as
 // the standard to compare to and an easy way to benchmark and test
 // modifications in a generic way.
-func handleCallback(cb StreamCallbackT, xi, xq, params, numSamples, reset uintptr) {
+func handleCallback(cb StreamCallbackT, xi, xq, params unsafe.Pointer, numSamples, reset uintptr) {
 	var (
 		sxi      []int16
 		sxq      []int16
 		cbParams *StreamCbParamsT
 	)
 
-	if xi != 0 && xq != 0 && numSamples > 0 {
+	if xi != nil && xq != nil && numSamples > 0 {
 		hxi := (*reflect.SliceHeader)(unsafe.Pointer(&sxi))
 		hxi.Cap = int(numSamples)
 		hxi.Len = int(numSamples)
-		hxi.Data = xi
+		hxi.Data = (uintptr)(xi)
 
 		hxq := (*reflect.SliceHeader)(unsafe.Pointer(&sxq))
 		hxq.Cap = int(numSamples)
 		hxq.Len = int(numSamples)
-		hxq.Data = xq
+		hxq.Data = (uintptr)(xq)
 	}
 
-	if params != 0 {
-		cbParams = (*StreamCbParamsT)(unsafe.Pointer(params))
+	if params != nil {
+		cbParams = (*StreamCbParamsT)(params)
 	}
 
 	cb(sxi, sxq, cbParams, reset != 0)
