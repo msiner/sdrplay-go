@@ -22,8 +22,6 @@ import "C"
 
 import (
 	"errors"
-	"fmt"
-	"reflect"
 	"sync"
 	"unsafe"
 )
@@ -374,64 +372,6 @@ func (Impl) SwapRspDuoDualTunerModeSampleRate(dev Handle, currentSampleRate *flo
 	et := ErrT(e)
 	if et != Success {
 		return et
-	}
-
-	return nil
-}
-
-func SanityCheck() error {
-	// Do any checks we need to guarantee compatibility.
-	specs := []struct {
-		goVal interface{}
-		cVal  interface{}
-	}{
-		{DeviceT{}, C.sdrplay_api_DeviceT{}},
-		{DevParamsT{}, C.sdrplay_api_DevParamsT{}},
-		{ErrorInfoT{}, C.sdrplay_api_ErrorInfoT{}},
-		{GainCbParamT{}, C.sdrplay_api_GainCbParamT{}},
-		{PowerOverloadCbParamT{}, C.sdrplay_api_PowerOverloadCbParamT{}},
-		{RspDuoModeCbParamT{}, C.sdrplay_api_RspDuoModeCbParamT{}},
-		{EventParamsT{}, C.sdrplay_api_EventParamsT{}},
-		{StreamCbParamsT{}, C.sdrplay_api_StreamCbParamsT{}},
-		{DcOffsetT{}, C.sdrplay_api_DcOffsetT{}},
-		{DecimationT{}, C.sdrplay_api_DecimationT{}},
-		{AgcT{}, C.sdrplay_api_AgcT{}},
-		{ControlParamsT{}, C.sdrplay_api_ControlParamsT{}},
-		{FsFreqT{}, C.sdrplay_api_FsFreqT{}},
-		{SyncUpdateT{}, C.sdrplay_api_SyncUpdateT{}},
-		{ResetFlagsT{}, C.sdrplay_api_ResetFlagsT{}},
-		{DevParamsT{}, C.sdrplay_api_DevParamsT{}},
-		{Rsp1aParamsT{}, C.sdrplay_api_Rsp1aParamsT{}},
-		{Rsp1aTunerParamsT{}, C.sdrplay_api_Rsp1aTunerParamsT{}},
-		{Rsp2ParamsT{}, C.sdrplay_api_Rsp2ParamsT{}},
-		{Rsp2TunerParamsT{}, C.sdrplay_api_Rsp2TunerParamsT{}},
-		{RspDuoParamsT{}, C.sdrplay_api_RspDuoParamsT{}},
-		{RspDuoTunerParamsT{}, C.sdrplay_api_RspDuoTunerParamsT{}},
-		{RspDxParamsT{}, C.sdrplay_api_RspDxParamsT{}},
-		{RspDxTunerParamsT{}, C.sdrplay_api_RspDxTunerParamsT{}},
-		{RxChannelParamsT{}, C.sdrplay_api_RxChannelParamsT{}},
-		{GainValuesT{}, C.sdrplay_api_GainValuesT{}},
-		{GainT{}, C.sdrplay_api_GainT{}},
-		{RfFreqT{}, C.sdrplay_api_RfFreqT{}},
-		{DcOffsetTunerT{}, C.sdrplay_api_DcOffsetTunerT{}},
-		{TunerParamsT{}, C.sdrplay_api_TunerParamsT{}},
-	}
-
-	for _, spec := range specs {
-		gt := reflect.TypeOf(spec.goVal)
-		ct := reflect.TypeOf(spec.goVal)
-		if gt.Size() != ct.Size() {
-			return fmt.Errorf(
-				"sizeof %s does not match C API; Go %d, C %d",
-				gt.Name(), gt.Size(), ct.Size(),
-			)
-		}
-		if gt.Align() != ct.Align() {
-			return fmt.Errorf(
-				"alignof %s does not match C API; Go %d, C %d",
-				gt.Name(), gt.Align(), ct.Align(),
-			)
-		}
 	}
 
 	return nil
