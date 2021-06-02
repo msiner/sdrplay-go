@@ -19,7 +19,7 @@ type InterleaveFn func(xia, xqa, xib, xqb []int16) []int16
 // The function uses an internal persistent buffer to minimize allocations.
 // The returned slice is a slice of that internal buffer and should not be
 // modified or stored.
-func NewInterleave() InterleaveFn {
+func NewInterleaveFn() InterleaveFn {
 	const scalarsPerFrame = 4
 	buf := make([]int16, 10*1024)
 	return func(xia, xqa, xib, xqb []int16) []int16 {

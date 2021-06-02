@@ -157,7 +157,7 @@ the sample rate.`,
 	}
 
 	lnaState, lnaPct, err := parse.CheckLNAFlag(*lnaOpt)
-	lnaCfg := session.WithNoopChanConfig()
+	lnaCfg := session.NoopChanConfig
 	switch {
 	case err != nil:
 		return err
@@ -202,8 +202,10 @@ the sample rate.`,
 
 	// Size of WAV sample, which is one component of an IQ sample.
 	var bytesPerSample uint8 = uint8(2) // sizeof(int16)
+	sampleFormat := wav.LPCM
 	if *floatOpt {
 		bytesPerSample = uint8(4) // sizeof(float32)
+		sampleFormat = wav.IEEEFloatingPoint
 	}
 
 	// Setup buffered file output.
@@ -220,7 +222,12 @@ the sample rate.`,
 	if *lifOpt {
 		finalFs = uint32(session.LowIFSampleRate / float64(dec))
 	}
-	head := wav.NewHeader(finalFs, 2, bytesPerSample, *floatOpt, *bigOpt, 0)
+
+	head, err := wav.NewHeader(finalFs, 2, bytesPerSample, sampleFormat, *bigOpt, 0)
+	if err != nil {
+		return err
+	}
+
 	if err := binary.Write(out, order, head); err != nil {
 		return err
 	}

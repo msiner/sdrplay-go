@@ -20,13 +20,11 @@ import (
 // detected or requested.
 type DevConfigFn func(d *api.DeviceT, p *api.DeviceParamsT) error
 
-// WithAnyParams creates a configuration function that returns nil
+// NoopDevConfig is a device configuration function that returns nil
 // without checking or modifying the params. It can be used as a noop
-// or placeholder for another function.
-func WithNoopDevConfig() DevConfigFn {
-	return func(d *api.DeviceT, p *api.DeviceParamsT) error {
-		return nil
-	}
+// or placeholder for another DevConfigFn function.
+func NoopDevConfig(d *api.DeviceT, p *api.DeviceParamsT) error {
+	return nil
 }
 
 // WithTransferMode creates a function that sets the USB transfer mode
@@ -63,22 +61,30 @@ func WithRefClockOutput(enabled bool) DevConfigFn {
 	}
 }
 
-func GetHighZPortEnabled(d *api.DeviceT, p *api.DeviceParamsT) (bool, error) {
+// GetHighZPortEnabled returns true if the High-Z port is enabled or false
+// if it is not enabled or if the device does not have a High-Z port.
+func GetHighZPortEnabled(d *api.DeviceT, p *api.DeviceParamsT) bool {
 	switch d.HWVer {
 	case api.RSP2_ID:
-		return p.RxChannelA.Rsp2TunerParams.AmPortSel == api.Rsp2_AMPORT_1, nil
+		return p.RxChannelA.Rsp2TunerParams.AmPortSel == api.Rsp2_AMPORT_1
 	case api.RSPduo_ID:
 		switch d.Tuner {
 		case api.Tuner_A, api.Tuner_Both:
-			return p.RxChannelA.RspDuoTunerParams.Tuner1AmPortSel == api.RspDuo_AMPORT_1, nil
+			return p.RxChannelA.RspDuoTunerParams.Tuner1AmPortSel == api.RspDuo_AMPORT_1
 		default:
-			return false, nil
+			return false
 		}
 	default:
-		return false, nil
+		return false
 	}
 }
 
+// SetHighZPortEnabled configures the devices High-Z port to enabled or
+// disabled as specified by the en argument. If the device does not have
+// a High-Z port, this function does nothing. If the device is an RSPduo
+// and tuner A or both tuners are selected, it will configure tuner A to
+// use the High-Z port. If the device is an RSPduo, but only tuner B is
+// selected, it returns an error.
 func SetHighZPortEnabled(d *api.DeviceT, p *api.DeviceParamsT, en bool) error {
 	switch d.HWVer {
 	case api.RSP1_ID:

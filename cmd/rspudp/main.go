@@ -144,7 +144,7 @@ This will use 8 bytes of the specified payload size.`,
 	}
 
 	lnaState, lnaPct, err := parse.CheckLNAFlag(*lnaOpt)
-	lnaCfg := session.WithNoopChanConfig()
+	lnaCfg := session.NoopChanConfig
 	switch {
 	case err != nil:
 		return err
@@ -202,7 +202,7 @@ This will use 8 bytes of the specified payload size.`,
 	log.Printf("Payload Size: %d B", *payOpt)
 
 	// Setup callback and control state.
-	write, err := udp.NewUDPPacketWrite(*payOpt, 2, *seqOpt, *bigOpt)
+	write, err := udp.NewPacketWriteFn(*payOpt, 2, *seqOpt, *bigOpt)
 	if err != nil {
 		return err
 	}

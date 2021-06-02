@@ -11,14 +11,28 @@ import (
 	"github.com/msiner/sdrplay-go/api"
 )
 
+// ChanConfigFn is a function type for configuring a single channel. The
+// function type is designed to be used during device configuration and
+// likely by a DevConfigFn. In most cases, such a function should only
+// need to modify the given RxChannelParamsT. The DeviceParamsT is
+// provided primarily as information about the configuration, but some
+// configuration options that are provided in the channel params for one
+// device type, may be in the device params for another device
+// (e.g. RfNotchEnable). The function returns a non-nil error if an
+// incompatible or impossible configuration is detected or requested.
 type ChanConfigFn func(d *api.DeviceT, p *api.DeviceParamsT, c *api.RxChannelParamsT) error
 
-func WithNoopChanConfig() ChanConfigFn {
-	return func(d *api.DeviceT, p *api.DeviceParamsT, c *api.RxChannelParamsT) error {
-		return nil
-	}
+// NoopChanConfig is a channel configuration function that returns nil
+// without checking or modifying the params. It can be used as a noop
+// or placeholder for another ChanConfigFn function.
+func NoopChanConfig(d *api.DeviceT, p *api.DeviceParamsT, c *api.RxChannelParamsT) error {
+	return nil
 }
 
+// WithSingleChannelConfig creates a DevConfigFn that applies the given
+// ChanConfigFn function list to the selected device and channel. The function
+// returns an error if the device is an RSPduo with neither or both channels
+// selected. Otherwise, it applies the channel configuration to RxChannelA.
 func WithSingleChannelConfig(fns ...ChanConfigFn) DevConfigFn {
 	return func(d *api.DeviceT, p *api.DeviceParamsT) error {
 		apply := func(c *api.RxChannelParamsT) error {
@@ -48,6 +62,12 @@ func WithSingleChannelConfig(fns ...ChanConfigFn) DevConfigFn {
 	}
 }
 
+// WithDuoChannelAConfig creates a DevConfigFn that applies the given
+// ChanConfigFn function list to the selected device and channel if the
+// device is an RSPduo and tuner A or both tuners are selected. The
+// function will return an error if the device is an RSPduo with only
+// tuner B selected. If the device is not an RSPduo, the function does
+// nothing.
 func WithDuoChannelAConfig(fns ...ChanConfigFn) DevConfigFn {
 	return func(d *api.DeviceT, p *api.DeviceParamsT) error {
 		apply := func(c *api.RxChannelParamsT) error {
@@ -77,6 +97,12 @@ func WithDuoChannelAConfig(fns ...ChanConfigFn) DevConfigFn {
 	}
 }
 
+// WithDuoChannelBConfig creates a DevConfigFn that applies the given
+// ChanConfigFn function list to the selected device and channel if the
+// device is an RSPduo and tuner B or both tuners are selected. The
+// function will return an error if the device is an RSPduo with only
+// tuner A selected. If the device is not an RSPduo, the function does
+// nothing.
 func WithDuoChannelBConfig(fns ...ChanConfigFn) DevConfigFn {
 	return func(d *api.DeviceT, p *api.DeviceParamsT) error {
 		apply := func(c *api.RxChannelParamsT) error {
@@ -106,6 +132,7 @@ func WithDuoChannelBConfig(fns ...ChanConfigFn) DevConfigFn {
 	}
 }
 
+// SetTuneFreq configures the tune frequency in the given device params.
 func SetTuneFreq(d *api.DeviceT, p *api.DeviceParamsT, c *api.RxChannelParamsT, freq float64) error {
 	if c == nil {
 		return errors.New("cannot configure nil channel")
@@ -124,6 +151,7 @@ func WithTuneFreq(freq float64) ChanConfigFn {
 	}
 }
 
+// SetGainReduction configures the gain reduction for the specified channel.
 func SetGainReduction(d *api.DeviceT, p *api.DeviceParamsT, c *api.RxChannelParamsT, grdb int32) error {
 	if c == nil {
 		return errors.New("cannot configure nil channel")
@@ -177,6 +205,7 @@ func WithBandwidth(bw api.Bw_MHzT) ChanConfigFn {
 	}
 }
 
+// SetAGC configures the AGC for the specified channel.
 func SetAGC(d *api.DeviceT, p *api.DeviceParamsT, c *api.RxChannelParamsT, en api.AgcControlT, set int32) error {
 	// Just use the SDRuno defaults for now.
 	const (
@@ -212,6 +241,11 @@ func WithAGC(en api.AgcControlT, set int32) ChanConfigFn {
 	}
 }
 
+// SetRfNotchEnabled enables or disables the filter labeled as "RfNotch" in
+// the C API. The RSP1A, RSP2, RSPduo, and RSPdx devices have an
+// "RfNotch". The individual filter responses may vary, but this
+// generally refers to a combined FM/MW notch filter. See the device
+// datasheets for details. The function has no effect on RSP1 devices.
 func SetRfNotchEnabled(d *api.DeviceT, p *api.DeviceParamsT, c *api.RxChannelParamsT, en bool) error {
 	if c == nil {
 		return errors.New("cannot configure nil channel")
@@ -236,18 +270,20 @@ func SetRfNotchEnabled(d *api.DeviceT, p *api.DeviceParamsT, c *api.RxChannelPar
 	return nil
 }
 
-// WithRfNotch creates a function that enables or disables the filter
-// labeled as "RfNotch" in the C API. The RSP1A, RSP2, RSPduo, and RSPdx
-// devices have an "RfNotch". The individual filter responses may vary,
-// but this generally refers to a combined FM/MW notch filter. See
-// the device datasheets for details. The function has no effect on
-// RSP1 devices.
+// WithRfNotchEnabled creates a function that uses SetRfNotchEnabled to enable
+// or disable RF notch filter.
 func WithRfNotchEnabled(en bool) ChanConfigFn {
 	return func(d *api.DeviceT, p *api.DeviceParamsT, c *api.RxChannelParamsT) error {
 		return SetRfNotchEnabled(d, p, c, en)
 	}
 }
 
+// SetRfDabNotchEnabled cenables or disables the filter labeled as
+// "RfDabNotch" in the C API. The RSP1A, RSPduo, and RSPdx devices have
+// an "RfDabNotch". The individual filter responses may vary, but this
+// refers to a digital audio broadcasting (DAB) notch filter. See the
+// device datasheets for details. The function has no effect on RSP1
+// and RSP2 devices.
 func SetRfDabNotchEnabled(d *api.DeviceT, p *api.DeviceParamsT, c *api.RxChannelParamsT, en bool) error {
 	if c == nil {
 		return errors.New("cannot configure nil channel")
@@ -272,12 +308,8 @@ func SetRfDabNotchEnabled(d *api.DeviceT, p *api.DeviceParamsT, c *api.RxChannel
 	return nil
 }
 
-// WithRfDabNotch creates a function that enables or disables the filter
-// labeled as "RfDabNotch" in the C API. The RSP1A, RSPduo, and RSPdx
-// devices have an "RfDabNotch". The individual filter responses may vary,
-// but this refers to a digital audio broadcasting (DAB) notch filter. See
-// the device datasheets for details. The function has no effect on RSP1
-// and RSP2 devices.
+// WithRfDabNotchEnabled creates a function that uses the
+// SetRfDabNotchEnabled function to enable or disable the DAB notch filter.
 func WithRfDabNotchEnabled(en bool) ChanConfigFn {
 	return func(d *api.DeviceT, p *api.DeviceParamsT, c *api.RxChannelParamsT) error {
 		return SetRfDabNotchEnabled(d, p, c, en)
@@ -289,6 +321,8 @@ type Logger interface {
 	Printf(format string, v ...interface{})
 }
 
+// WithLogChannelParams creates a function that prints channel configuration
+// values to the specified Logger.
 func WithLogChannelParams(prefix string, lg Logger) ChanConfigFn {
 	return func(d *api.DeviceT, p *api.DeviceParamsT, c *api.RxChannelParamsT) error {
 		rate, err := GetEffectiveSampleRate(d, p, c)

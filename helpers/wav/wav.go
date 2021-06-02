@@ -4,6 +4,8 @@
 
 package wav
 
+import "fmt"
+
 type RiffChunk struct {
 	ChunkId   [4]byte
 	ChunkSize uint32
@@ -42,6 +44,13 @@ type Header struct {
 	// samples follow the header data chunk
 }
 
+type SampleFormat uint16
+
+const (
+	LPCM              SampleFormat = 1
+	IEEEFloatingPoint SampleFormat = 3
+)
+
 // NewHeader creates and initializes a new WAV Header struct. The header
 // can be written using encoding/binary.Write().
 //
@@ -56,8 +65,8 @@ type Header struct {
 // struct can be updated with the correct size later with the Update method.
 func NewHeader(
 	sampleRate uint32, numChannels uint16, bytesPerSample uint8,
-	floatingPoint bool, bigEndian bool, numFrames uint32,
-) *Header {
+	format SampleFormat, bigEndian bool, numFrames uint32,
+) (*Header, error) {
 	head := Header{}
 	dataBytes := numFrames * (uint32(bytesPerSample) * uint32(numChannels))
 
@@ -74,13 +83,25 @@ func NewHeader(
 	// fmt header
 	head.Fmt.ChunkId = [4]byte{'f', 'm', 't', ' '}
 	head.Fmt.ChunkSize = 18
-	switch floatingPoint {
-	case true:
-		// IEEE floating point
-		head.Fmt.AudioFormat = 3
+	switch format {
+	case IEEEFloatingPoint:
+		head.Fmt.AudioFormat = uint16(IEEEFloatingPoint)
+		switch bytesPerSample {
+		case 4, 8:
+			// Good
+		default:
+			return nil, fmt.Errorf("invalid bytes per sample for floating point format; got %d, want 4 or 8", bytesPerSample)
+		}
+	case LPCM:
+		head.Fmt.AudioFormat = uint16(LPCM)
+		switch bytesPerSample {
+		case 1, 2, 3, 4:
+			// Good
+		default:
+			return nil, fmt.Errorf("invalid bytes per sample for PCM format; got %d, want 1, 2, 3, or 4", bytesPerSample)
+		}
 	default:
-		// LPCM
-		head.Fmt.AudioFormat = 1
+		return nil, fmt.Errorf("invalid sample format; got %d, want LPCM or IEEEFloatingPoint", format)
 	}
 	head.Fmt.NumChannels = numChannels
 	head.Fmt.SampleRate = sampleRate
@@ -98,7 +119,7 @@ func NewHeader(
 	head.Data.ChunkId = [4]byte{'d', 'a', 't', 'a'}
 	head.Data.ChunkSize = dataBytes
 
-	return &head
+	return &head, nil
 }
 
 // Update sets all of the data size dependent fields in the

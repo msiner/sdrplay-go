@@ -139,7 +139,7 @@ analog bandwidths of 1.536 MHz, 600 kHz, 300 kHz, and 200 kHz.
 	}
 
 	lnaState, lnaPct, err := parse.CheckLNAFlag(*lnaOpt)
-	lnaCfg := session.WithNoopChanConfig()
+	lnaCfg := session.NoopChanConfig
 	switch {
 	case err != nil:
 		return err
@@ -169,8 +169,10 @@ analog bandwidths of 1.536 MHz, 600 kHz, 300 kHz, and 200 kHz.
 
 	// Size of WAV sample, which is one component of an IQ sample.
 	bytesPerSample := uint8(2) // sizeof(int16)
+	sampleFormat := wav.LPCM
 	if *floatOpt {
 		bytesPerSample = uint8(4) // sizeof(float32)
+		sampleFormat = wav.IEEEFloatingPoint
 	}
 
 	// Setup buffered file output.
@@ -184,7 +186,10 @@ analog bandwidths of 1.536 MHz, 600 kHz, 300 kHz, and 200 kHz.
 	// Write the initial WAV header with 0 samples.
 	var totalBytes uint64
 	finalFs := uint32(session.LowIFSampleRate / float64(dec))
-	head := wav.NewHeader(finalFs, 4, bytesPerSample, *floatOpt, *bigOpt, 0)
+	head, err := wav.NewHeader(finalFs, 4, bytesPerSample, sampleFormat, *bigOpt, 0)
+	if err != nil {
+		return err
+	}
 	if err := binary.Write(out, order, head); err != nil {
 		return err
 	}
@@ -209,7 +214,7 @@ analog bandwidths of 1.536 MHz, 600 kHz, 300 kHz, and 200 kHz.
 	}()
 
 	// Setup callback and control state.
-	interleave := duo.NewInterleave()
+	interleave := duo.NewInterleaveFn()
 	toFloats := callback.NewConvertToFloat32Fn(16)
 	writeInts := callback.NewWriteFn(order)
 	writeFloats := callback.NewFloat32WriteFn(order)

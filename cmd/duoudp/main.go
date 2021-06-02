@@ -128,7 +128,7 @@ analog bandwidths of 1.536 MHz, 600 kHz, 300 kHz, and 200 kHz.
 	}
 
 	lnaState, lnaPct, err := parse.CheckLNAFlag(*lnaOpt)
-	lnaCfg := session.WithNoopChanConfig()
+	lnaCfg := session.NoopChanConfig
 	switch {
 	case err != nil:
 		return err
@@ -171,11 +171,11 @@ analog bandwidths of 1.536 MHz, 600 kHz, 300 kHz, and 200 kHz.
 	lg.Printf("Payload Size: %d B", *payOpt)
 
 	// Setup callback and control state.
-	write, err := udp.NewUDPPacketWrite(*payOpt, 4, *seqOpt, *bigOpt)
+	write, err := udp.NewPacketWriteFn(*payOpt, 4, *seqOpt, *bigOpt)
 	if err != nil {
 		return err
 	}
-	interleave := duo.NewInterleave()
+	interleave := duo.NewInterleaveFn()
 	detectDropsA := callback.NewDropDetectFn()
 	detectDropsB := callback.NewDropDetectFn()
 

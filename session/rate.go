@@ -10,6 +10,9 @@ import (
 	"github.com/msiner/sdrplay-go/api"
 )
 
+// GetEffectiveSampleRate returns the specified channels final or effective
+// sample rate after decimation and/or, in the case of low-IF mode,
+// down-conversion. The returned sample rate is in complex samples per second.
 func GetEffectiveSampleRate(d *api.DeviceT, p *api.DeviceParamsT, c *api.RxChannelParamsT) (float64, error) {
 	if c == nil {
 		return 0, errors.New("cannot inspect nil channel")
