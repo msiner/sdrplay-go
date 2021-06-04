@@ -4,7 +4,6 @@ package session
 
 import (
 	"context"
-	"fmt"
 	"testing"
 	"time"
 
@@ -16,15 +15,15 @@ func TestWithDevice(t *testing.T) {
 
 	sess, err := NewSession(
 		WithSelector(
-			WithDuoModeShared(false),
-			WithDuoTunerEither(),
+			WithDuoModeSingle(),
+			WithDuoTunerA(),
 		),
 		WithDeviceConfig(
 			WithTransferMode(api.ISOCH),
 			WithSingleChannelConfig(
-				WithTuneFreq(92.1e6),
-				WithAGC(api.AGC_CTRL_EN, -20),
-				WithLowIF(LowIFMaxBits, 2),
+				WithTuneFreq(1.001e9),
+				WithAGC(api.AGC_CTRL_EN, -30),
+				WithZeroIF(4e6, 2),
 			),
 		),
 		WithStreamACallback(func(xi, xq []int16, params *api.StreamCbParamsT, reset bool) {
@@ -35,7 +34,7 @@ func TestWithDevice(t *testing.T) {
 			}
 		}),
 		WithEventCallback(func(eventId api.EventT, tuner api.TunerSelectT, params *api.EventParamsT) {
-			fmt.Println(eventId, tuner)
+			t.Log(eventId, tuner)
 		}),
 		WithControlLoop(func(ctx context.Context, d *api.DeviceT, a api.API) error {
 			tmr := time.NewTimer(2 * time.Second)
