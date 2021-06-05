@@ -8,6 +8,8 @@ package api
 
 import (
 	"errors"
+	"fmt"
+	"path/filepath"
 	"sync"
 	"unsafe"
 
@@ -20,25 +22,33 @@ import (
 // from functions.
 type Handle uintptr
 
+// Proc is an interface that is implemented by both windows.LazyProc
+// and windows.Proc. The adaptive DLL loading implemented in the
+// init() function means that we might be using either implementation
+// at run-time.
+type Proc interface {
+	Call(a ...uintptr) (r1, r2 uintptr, lastErr error)
+}
+
+// References to C API functions are loaded in init().
 var (
-	dll                                           = windows.NewLazyDLL("sdrplay_api")
-	sdrplay_api_Open                              = dll.NewProc("sdrplay_api_Open")
-	sdrplay_api_Close                             = dll.NewProc("sdrplay_api_Open")
-	sdrplay_api_ApiVersion                        = dll.NewProc("sdrplay_api_ApiVersion")
-	sdrplay_api_LockDeviceApi                     = dll.NewProc("sdrplay_api_LockDeviceApi")
-	sdrplay_api_UnlockDeviceApi                   = dll.NewProc("sdrplay_api_UnlockDeviceApi")
-	sdrplay_api_GetDevices                        = dll.NewProc("sdrplay_api_GetDevices")
-	sdrplay_api_SelectDevice                      = dll.NewProc("sdrplay_api_SelectDevice")
-	sdrplay_api_ReleaseDevice                     = dll.NewProc("sdrplay_api_ReleaseDevice")
-	sdrplay_api_GetLastError                      = dll.NewProc("sdrplay_api_GetLastError")
-	sdrplay_api_DisableHeartbeat                  = dll.NewProc("sdrplay_api_DisableHeartbeat")
-	sdrplay_api_DebugEnable                       = dll.NewProc("sdrplay_api_DebugEnable")
-	sdrplay_api_GetDeviceParams                   = dll.NewProc("sdrplay_api_GetDeviceParams")
-	sdrplay_api_Init                              = dll.NewProc("sdrplay_api_Init")
-	sdrplay_api_Uninit                            = dll.NewProc("sdrplay_api_Uninit")
-	sdrplay_api_Update                            = dll.NewProc("sdrplay_api_Update")
-	sdrplay_api_SwapRspDuoActiveTuner             = dll.NewProc("sdrplay_api_SwapRspDuoActiveTuner")
-	sdrplay_api_SwapRspDuoDualTunerModeSampleRate = dll.NewProc("sdrplay_api_SwapRspDuoDualTunerModeSampleRate")
+	sdrplay_api_Open                              Proc
+	sdrplay_api_Close                             Proc
+	sdrplay_api_ApiVersion                        Proc
+	sdrplay_api_LockDeviceApi                     Proc
+	sdrplay_api_UnlockDeviceApi                   Proc
+	sdrplay_api_GetDevices                        Proc
+	sdrplay_api_SelectDevice                      Proc
+	sdrplay_api_ReleaseDevice                     Proc
+	sdrplay_api_GetLastError                      Proc
+	sdrplay_api_DisableHeartbeat                  Proc
+	sdrplay_api_DebugEnable                       Proc
+	sdrplay_api_GetDeviceParams                   Proc
+	sdrplay_api_Init                              Proc
+	sdrplay_api_Uninit                            Proc
+	sdrplay_api_Update                            Proc
+	sdrplay_api_SwapRspDuoActiveTuner             Proc
+	sdrplay_api_SwapRspDuoDualTunerModeSampleRate Proc
 )
 
 var apiMutex sync.Mutex
@@ -415,4 +425,69 @@ func (Impl) SwapRspDuoDualTunerModeSampleRate(dev Handle, currentSampleRate *flo
 	}
 
 	return nil
+}
+
+func init() {
+	// First try to load the DLL by name using standard WIndows
+	// library path resolution. This should find sdrplay_api.dll if
+	// it is in one of the following locations.
+	//
+	// 	1. Current working directory.
+	//	2. Same directory as executable.
+	//	3. A directory included in the Path environment variable.
+	//
+	// Unlike Linux, where libraries are grouped into common directories
+	// like /usr/lib or /usr/local/lib. It is less likely that a Windows user
+	// has modified their environment variables to include random library
+	// directories in "C:\Program Files".
+	lazy := windows.NewLazyDLL("sdrplay_api")
+	newProc := func(name string) Proc {
+		return lazy.NewProc(name)
+	}
+	if err := lazy.Load(); err != nil {
+		// We couldn't find sdrplay_api.dll through normal path resolution.
+		// As a backup plan, we will try to load from an absolute path that
+		// points to the standard location for the SDRPlay API installer to
+		// install sdrplay_api.dll. DLL_PATH is different for 32-bit and
+		// 64-bit architectures.
+		//
+		// For security reasons, the LoadDLL function should only be used
+		// with absolute paths.
+		if !filepath.IsAbs(DLL_PATH) {
+			panic(fmt.Sprintf("DLL_PATH is not absolute, refusing to load DLL; %s", DLL_PATH))
+		}
+		direct, err := windows.LoadDLL(DLL_PATH)
+		if err != nil {
+			// There is nothing else we can do at this point.
+			panic(fmt.Sprintf("sdrplay_api.dll not found in Path or %s", DLL_PATH))
+		}
+		newProc = func(name string) Proc {
+			// Ignore the error because that produces the same behavior
+			// as if we were using the lazy loaded DLL. Specifically,
+			// we will panic when a missing Proc is used. The Swap*
+			// functions don't appear in older API versions, so this
+			// is also a somewhat graceful way of being backwards
+			// compatible.
+			proc, _ := direct.FindProc(name)
+			return proc
+		}
+	}
+
+	sdrplay_api_Open = newProc("sdrplay_api_Open")
+	sdrplay_api_Close = newProc("sdrplay_api_Open")
+	sdrplay_api_ApiVersion = newProc("sdrplay_api_ApiVersion")
+	sdrplay_api_LockDeviceApi = newProc("sdrplay_api_LockDeviceApi")
+	sdrplay_api_UnlockDeviceApi = newProc("sdrplay_api_UnlockDeviceApi")
+	sdrplay_api_GetDevices = newProc("sdrplay_api_GetDevices")
+	sdrplay_api_SelectDevice = newProc("sdrplay_api_SelectDevice")
+	sdrplay_api_ReleaseDevice = newProc("sdrplay_api_ReleaseDevice")
+	sdrplay_api_GetLastError = newProc("sdrplay_api_GetLastError")
+	sdrplay_api_DisableHeartbeat = newProc("sdrplay_api_DisableHeartbeat")
+	sdrplay_api_DebugEnable = newProc("sdrplay_api_DebugEnable")
+	sdrplay_api_GetDeviceParams = newProc("sdrplay_api_GetDeviceParams")
+	sdrplay_api_Init = newProc("sdrplay_api_Init")
+	sdrplay_api_Uninit = newProc("sdrplay_api_Uninit")
+	sdrplay_api_Update = newProc("sdrplay_api_Update")
+	sdrplay_api_SwapRspDuoActiveTuner = newProc("sdrplay_api_SwapRspDuoActiveTuner")
+	sdrplay_api_SwapRspDuoDualTunerModeSampleRate = newProc("sdrplay_api_SwapRspDuoDualTunerModeSampleRate")
 }
