@@ -279,7 +279,8 @@ analog bandwidths of 1.536 MHz, 600 kHz, 300 kHz, and 200 kHz.
 		},
 	)
 
-	sess, err := session.NewSession(
+	err = session.Run(
+		ctx,
 		session.WithSelector(
 			serialsFilter,
 			session.WithRSPduo(),
@@ -358,12 +359,6 @@ analog bandwidths of 1.536 MHz, 600 kHz, 300 kHz, and 200 kHz.
 			}
 		}),
 	)
-	if err != nil {
-		return fmt.Errorf("error creating session; %v", err)
-	}
-
-	// Blocks until error or the context is canceled.
-	err = session.Run(ctx, sess)
 	switch err {
 	case nil, context.Canceled:
 		lg.Println("clean exit")

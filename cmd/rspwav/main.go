@@ -277,7 +277,8 @@ the sample rate.`,
 		}
 	}()
 
-	sess, err := session.NewSession(
+	err = session.Run(
+		ctx,
 		session.WithSelector(
 			serialsFilter,
 			duoTunerFilter,
@@ -379,12 +380,6 @@ the sample rate.`,
 			}
 		}),
 	)
-	if err != nil {
-		return fmt.Errorf("error creating session; %v", err)
-	}
-
-	// Blocks until error or the context is canceled.
-	err = session.Run(ctx, sess)
 	switch err {
 	case nil, context.Canceled:
 		log.Println("clean exit")

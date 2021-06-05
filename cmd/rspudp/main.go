@@ -227,7 +227,8 @@ This will use 8 bytes of the specified payload size.`,
 		}
 	}()
 
-	sess, err := session.NewSession(
+	err = session.Run(
+		ctx,
 		session.WithSelector(
 			serialsFilter,
 			duoTunerFilter,
@@ -318,12 +319,6 @@ This will use 8 bytes of the specified payload size.`,
 			}
 		}),
 	)
-	if err != nil {
-		return fmt.Errorf("error creating session; %v", err)
-	}
-
-	// Blocks until error or the context is canceled.
-	err = session.Run(ctx, sess)
 	switch err {
 	case nil, context.Canceled:
 		log.Println("clean exit")

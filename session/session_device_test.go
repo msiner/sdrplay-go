@@ -13,7 +13,8 @@ import (
 func TestWithDevice(t *testing.T) {
 	gotData := make(chan bool, 1)
 
-	sess, err := NewSession(
+	err := Run(
+		context.Background(),
 		WithSelector(
 			WithDuoModeSingle(),
 			WithDuoTunerA(),
@@ -52,10 +53,6 @@ func TestWithDevice(t *testing.T) {
 		}),
 	)
 	if err != nil {
-		t.Fatalf("error creating session; %v", err)
-	}
-
-	if err := Run(context.Background(), sess); err != nil {
 		t.Errorf("error returned from Run; %v", err)
 	}
 }

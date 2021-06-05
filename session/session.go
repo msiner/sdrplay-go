@@ -157,8 +157,8 @@ func WithControlLoop(fn ControlFn) ConfigFn {
 	}
 }
 
-func Run(ctx context.Context, opt *Session) error {
-	impl := opt.Impl
+func (s *Session) Run(ctx context.Context) error {
+	impl := s.Impl
 	if impl == nil {
 		impl = api.GetAPI()
 	}
@@ -190,8 +190,8 @@ func Run(ctx context.Context, opt *Session) error {
 		}
 
 		res := devs[0]
-		if opt.Selector != nil {
-			res := opt.Selector(devs)
+		if s.Selector != nil {
+			res := s.Selector(devs)
 			if res == nil {
 				var parts []string
 				for _, dev := range devs {
@@ -219,7 +219,7 @@ func Run(ctx context.Context, opt *Session) error {
 	}
 	defer impl.ReleaseDevice(dev)
 
-	if opt.DebugEn {
+	if s.DebugEn {
 		if err := impl.DebugEnable(dev.Dev, api.DbgLvl_Message); err != nil {
 			return fmt.Errorf("debug enable failed: %v", impl.GetLastError(dev))
 		}
@@ -230,8 +230,8 @@ func Run(ctx context.Context, opt *Session) error {
 		return fmt.Errorf("failed to load device params: %v", impl.GetLastError(dev))
 	}
 
-	if opt.DevCfg != nil {
-		if err := opt.DevCfg(dev, params); err != nil {
+	if s.DevCfg != nil {
+		if err := s.DevCfg(dev, params); err != nil {
 			return err
 		}
 	}
@@ -241,20 +241,28 @@ func Run(ctx context.Context, opt *Session) error {
 	}
 
 	cbFuncs := api.CallbackFnsT{
-		StreamACbFn: opt.StreamACbFn,
-		StreamBCbFn: opt.StreamBCbFn,
-		EventCbFn:   opt.EventCbFn,
+		StreamACbFn: s.StreamACbFn,
+		StreamBCbFn: s.StreamBCbFn,
+		EventCbFn:   s.EventCbFn,
 	}
 	if err := impl.Init(dev.Dev, cbFuncs); err != nil {
 		return fmt.Errorf("init failed: %v", impl.GetLastError(dev))
 	}
 	defer impl.Uninit(dev.Dev)
 
-	switch opt.Control {
+	switch s.Control {
 	case nil:
 		<-ctx.Done()
 		return ctx.Err()
 	default:
-		return opt.Control(ctx, dev, impl)
+		return s.Control(ctx, dev, impl)
 	}
+}
+
+func Run(ctx context.Context, fns ...ConfigFn) error {
+	s, err := NewSession(fns...)
+	if err != nil {
+		return err
+	}
+	return s.Run(ctx)
 }
