@@ -5,13 +5,10 @@
 package main
 
 import (
-	"bufio"
 	"context"
-	"encoding/binary"
 	"errors"
 	"flag"
 	"fmt"
-	"io"
 	"log"
 	"os"
 	"os/signal"
@@ -24,42 +21,54 @@ import (
 	"github.com/msiner/sdrplay-go/helpers/duo"
 	"github.com/msiner/sdrplay-go/helpers/event"
 	"github.com/msiner/sdrplay-go/helpers/parse"
-	"github.com/msiner/sdrplay-go/helpers/wav"
 	"github.com/msiner/sdrplay-go/session"
 )
 
 func duowav() error {
-	flags := flag.NewFlagSet("duowav", flag.ExitOnError)
+	flags := flag.NewFlagSet("duocorr", flag.ExitOnError)
 	flags.Usage = func() {
 		fmt.Fprintln(flags.Output(), strings.TrimSpace(`
-Usage: duowav [FLAGS] <tuneHz> <fileBytes>
+Usage: duocorr [FLAGS] <tuneHz> <duration>
 
-duowav connects to an available RSPduo device, configures it, and writes
-the received samples to a file in WAV format. The WAV file has four
-channels (interpreted by audio software as front left, front right, front
-center, and low frequency) corresponding to tuner A I, tuner A Q,
-tuner B I, and tuner B Q respectively where I and Q are the real and
-imaginary components respectively. The samples are stored
-as 16-bit signed integers in little-endian format with the components
-interleaved (e.g. AI1,AQ1,BI1,BQ1,...,AIn,AQn,BIn,BQn).
+duocorr connects to an available RSPduo device, configures it
+in dual-tuner mode with both tuners having the same configuration.
+It then continuously calculates a correlation between channel A and
+channel B for the specified time duration.
+
+Correlation results will be printed to standard out. The "-inter"
+flag determines the interval for printing results. The results
+reported at the end of each interval period reflect all measurements
+taken during that period.
+
+Since the dual tuners of the RSPduo are not phase-coherent, duocorr
+performs a correlation of the magnitudes of samples. This is reported
+as the offset of the correlation peak in the number of samples plus
+or minus from the center. The z-score of the correlation peak is also
+computed and reported.
+
+duocorr is a very rudimentary tool included for testing purposes. It
+can serve the practical application of measuring or detecting a time
+offset in an antenna and cabling setup that might make dual-antenna
+diversity processing less reliable. Also, duocorr is not optimized.
+This was intentional to be able to include this tool in the repository
+without introducing a module dependency on a third-party DSP library.
 
 Arguments:
   tuneHz
 	Tuner RF frequency in Hz is a mandatory argument. It can
 	be specified with k, K, m, M, g, or G suffix to indicate the
 	value is in kHz, MHz, or GHz respectively (e.g. 1.42G).
-  fileBytes
-	Maximum output file size in bytes. It can be specified with
-	k, K, m, M, g, or G suffix to indicate the value is in KiB, MiB,
-	or GiB respectively (e.g. 10M)
-	NOTE: WAV files cannot exceed 4 GiB.
+  duration
+	Amount of time to process correlations before exiting. It can be
+	specified with a s, S, m, M, h, or H suffix to indicate the value
+	is in seconds, minutes, or hours respectively (e.g. 10s). Without
+	a suffix provided, the value is interpreted as seconds.
 
 Flags:
 `,
 		))
 		flags.PrintDefaults()
 	}
-	outOpt := flags.String("out", "duo.wav", "Write WAV file to specified path.")
 	lnaOpt := flags.String("lna", "50%", parse.LNAFlagHelp)
 	decOpt := flags.Uint("dec", 1, parse.DecFlagHelp)
 	warmOpt := flags.Uint("warm", 2, parse.WarmFlagHelp)
@@ -79,8 +88,7 @@ at the widest bandwidth. The default mode is also compatible with
 analog bandwidths of 1.536 MHz, 600 kHz, 300 kHz, and 200 kHz.
 6 MHz operation should result in a slightly lower CPU load.`,
 	))
-	floatOpt := flags.Bool("float", false, "Write samples in floating-point format")
-	bigOpt := flags.Bool("big", false, "Write samples with big-endian byte order")
+	interOpt := flags.String("inter", "1s", "measurement reporting interval")
 
 	flags.Parse(os.Args[1:])
 
@@ -104,13 +112,9 @@ analog bandwidths of 1.536 MHz, 600 kHz, 300 kHz, and 200 kHz.
 	if err != nil {
 		return err
 	}
-	numBytes, err := parse.ParseSize(flags.Arg(1))
+	dur, err := ParseDuration(flags.Arg(1))
 	if err != nil {
 		return err
-	}
-	// Limitation of standard WAV header format.
-	if numBytes > 4*1024*1024*1024 {
-		return fmt.Errorf("invalid file size; got %d bytes, but WAV has a maximum of 4 GiB", numBytes)
 	}
 
 	dec, err := parse.CheckDecFlag(*decOpt)
@@ -162,71 +166,18 @@ analog bandwidths of 1.536 MHz, 600 kHz, 300 kHz, and 200 kHz.
 		serialsFilter = session.WithSerials(serials...)
 	}
 
-	var order binary.ByteOrder = binary.LittleEndian
-	if *bigOpt {
-		order = binary.BigEndian
-	}
-
-	// Size of WAV sample, which is one component of an IQ sample.
-	bytesPerSample := uint8(2) // sizeof(int16)
-	sampleFormat := wav.LPCM
-	if *floatOpt {
-		bytesPerSample = uint8(4) // sizeof(float32)
-		sampleFormat = wav.IEEEFloatingPoint
-	}
-
-	// Setup buffered file output.
-	fout, err := os.Create(*outOpt)
+	inter, err := ParseDuration(*interOpt)
 	if err != nil {
 		return err
 	}
-	defer fout.Close()
-	out := bufio.NewWriterSize(fout, 1024*1024)
-
-	// Write the initial WAV header with 0 samples.
-	var totalBytes uint64
-	finalFs := uint32(session.LowIFSampleRate / float64(dec))
-	head, err := wav.NewHeader(finalFs, 4, bytesPerSample, sampleFormat, *bigOpt, 0)
-	if err != nil {
-		return err
-	}
-	if err := binary.Write(out, order, head); err != nil {
-		return err
-	}
-	totalBytes += uint64(binary.Size(head))
-
-	// Before rspwav exits, seek back to the beginning and
-	// update the WAV header with the correct number of samples and
-	// flush the buffered writer.
-	defer func() {
-		dataBytes := totalBytes - uint64(binary.Size(head))
-		numFrames := uint32(dataBytes / uint64(bytesPerSample) / 4)
-		lg.Printf("update WAV header; dataBytes=%d dataFrames=%d", dataBytes, numFrames)
-		head.Update(numFrames)
-		out.Flush()
-		_, err = fout.Seek(0, io.SeekStart)
-		if err != nil {
-			lg.Printf("failed to seek back to header; %v", err)
-		}
-		if err := binary.Write(fout, order, head); err != nil {
-			lg.Printf("failed to update header; %v", err)
-		}
-	}()
 
 	// Setup callback and control state.
-	interleave := duo.NewInterleaveFn()
-	toFloats := callback.NewConvertToFloat32Fn(16)
-	writeInts := callback.NewWriteFn(order)
-	writeFloats := callback.NewFloat32WriteFn(order)
+	const cbSamples = 10000
+	corr := NewCorrelationFn(cbSamples)
+	peak := IntAccumulator{}
+	zscore := FloatAccumulator{}
 	detectDropsA := callback.NewDropDetectFn()
 	detectDropsB := callback.NewDropDetectFn()
-
-	var isWarm uint32
-	go func() {
-		time.Sleep(warm)
-		lg.Println("warm-up complete")
-		atomic.StoreUint32(&isWarm, 1)
-	}()
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
@@ -240,44 +191,79 @@ analog bandwidths of 1.536 MHz, 600 kHz, 300 kHz, and 200 kHz.
 		}
 	}()
 
+	var isWarm uint32
+	interTkr := time.NewTicker(inter)
+	go func() {
+		time.Sleep(warm)
+		lg.Println("warm-up complete")
+		interTkr.Reset(inter)
+		atomic.StoreUint32(&isWarm, 1)
+		tmr := time.NewTimer(dur)
+		select {
+		case <-ctx.Done():
+		case <-tmr.C:
+			cancel()
+		}
+	}()
+
 	evtChan := event.NewEventChan(10)
 	defer evtChan.Close()
 
+	syncChan := duo.NewSynchroChan(1000)
+
 	synchro := duo.NewSynchro(
-		10000,
-		func(xia, xqa, xib, xqb []int16, reset bool) {
-			select {
-			case <-ctx.Done():
-				return
-			default:
-			}
-
-			x := interleave(xia, xqa, xib, xqb)
-
-			var (
-				n   int
-				err error
-			)
-			switch *floatOpt {
-			case true:
-				n, err = writeFloats(out, toFloats(x))
-			default:
-				n, err = writeInts(out, x)
-			}
-
-			totalBytes += uint64(n)
-			switch {
-			case err != nil:
-				lg.Printf("write failed, cancel; %v\n", err)
-				cancel()
-			case totalBytes > numBytes:
-				cancel()
-			}
-		},
+		cbSamples,
+		syncChan.Callback,
 		func(evt duo.SynchroEvent, msg string) {
 			lg.Printf("%s: %s\n", evt, msg)
 		},
 	)
+
+	var (
+		msgNum      uint64
+		msgNumValid bool
+	)
+	go func() {
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			case msg := <-syncChan.C:
+				switch msgNumValid {
+				case true:
+					diff := msg.MsgNum - msgNum
+					if diff != 1 {
+						lg.Printf("dropped %d messages from synchro", diff)
+					}
+				default:
+					msgNumValid = true
+				}
+				msgNum = msg.MsgNum
+
+				res := corr(&msg)
+				peak.Add(res.Peak)
+				zscore.Add(res.ZScore)
+
+				select {
+				case <-interTkr.C:
+					pstats := peak.Analyze()
+					peak.Reset()
+					zstats := zscore.Analyze()
+					zscore.Reset()
+					lg.Printf("Report: measurements=%d\n", pstats.Count)
+					lg.Printf(
+						"Report: peak_offset(mean=%0.2f stddev=%0.2f median=%d min=%d max=%d)\n",
+						pstats.Mean, pstats.StdDev, pstats.Median, pstats.Min, pstats.Max,
+					)
+					lg.Printf(
+						"Report: peak_zscore(mean=%0.2f stddev=%0.2f median=%0.2f min=%0.2f max=%0.2f)\n",
+						zstats.Mean, zstats.StdDev, zstats.Median, zstats.Min, zstats.Max,
+					)
+				default:
+				}
+			}
+		}
+	}()
 
 	err = session.Run(
 		ctx,
@@ -323,7 +309,10 @@ analog bandwidths of 1.536 MHz, 600 kHz, 300 kHz, and 200 kHz.
 
 			d := detectDropsA(params, reset)
 			if d != 0 {
-				lg.Printf("stream A: dropped %d samples %v\n", d, reset)
+				lg.Printf(
+					"stream A: dropped %d samples; firstSampleNum=%d numSamples=%d reset=%v\n",
+					d, params.FirstSampleNum, params.NumSamples, reset,
+				)
 				reset = true
 			}
 			synchro.StreamACallback(xi, xq, params, reset)
@@ -341,7 +330,10 @@ analog bandwidths of 1.536 MHz, 600 kHz, 300 kHz, and 200 kHz.
 
 			d := detectDropsB(params, reset)
 			if d != 0 {
-				lg.Printf("stream B: dropped %d samples %v\n", d, reset)
+				lg.Printf(
+					"stream B: dropped %d samples; firstSampleNum=%d numSamples=%d reset=%v\n",
+					d, params.FirstSampleNum, params.NumSamples, reset,
+				)
 				reset = true
 			}
 			synchro.StreamBCallback(xi, xq, params, reset)

@@ -137,7 +137,7 @@ func (f *Synchro) doEvent(evt SynchroEvent, msg string) {
 //
 // The user-provided stream callback is not called from UpdateStreamA.
 // It is only called from UpdateStreamB.
-func (f *Synchro) UpdateStreamA(xi, xq []int16, params *api.StreamCbParamsT, reset bool) {
+func (f *Synchro) StreamACallback(xi, xq []int16, params *api.StreamCbParamsT, reset bool) {
 	if reset {
 		f.Reset()
 	}
@@ -180,7 +180,7 @@ func (f *Synchro) UpdateStreamA(xi, xq []int16, params *api.StreamCbParamsT, res
 // UpdateStreamA.
 //
 // The user-provided stream callback is only called from UpdateStreamB.
-func (f *Synchro) UpdateStreamB(xi, xq []int16, params *api.StreamCbParamsT, reset bool) {
+func (f *Synchro) StreamBCallback(xi, xq []int16, params *api.StreamCbParamsT, reset bool) {
 	switch {
 	case len(xi) != len(xq):
 		if f.sync {

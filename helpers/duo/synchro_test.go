@@ -69,10 +69,10 @@ func TestSynchro(t *testing.T) {
 		xqb[i] = int16(val + 3)
 		val += 4
 	}
-	f.UpdateStreamA(xia, xqa, nil, true)
-	f.UpdateStreamB(xib, xqb, nil, true)
-	f.UpdateStreamA(xia, xqa, nil, false)
-	f.UpdateStreamB(xib, xqb, nil, false)
+	f.StreamACallback(xia, xqa, nil, true)
+	f.StreamBCallback(xib, xqb, nil, true)
+	f.StreamACallback(xia, xqa, nil, false)
+	f.StreamBCallback(xib, xqb, nil, false)
 	if numResets != 1 {
 		t.Errorf("wrong number of resets; got %d, want 1", numResets)
 	}
@@ -84,7 +84,7 @@ func TestSynchro(t *testing.T) {
 	}
 
 	lastEvent = nil
-	f.UpdateStreamB(xib, xqb, nil, false)
+	f.StreamBCallback(xib, xqb, nil, false)
 	if lastEvent == nil {
 		t.Fatal("expected out of sync event; got none")
 	}
@@ -99,14 +99,14 @@ func TestSynchro(t *testing.T) {
 	}
 
 	lastEvent = nil
-	f.UpdateStreamB(xib, xqb, nil, false)
+	f.StreamBCallback(xib, xqb, nil, false)
 	if lastEvent != nil {
 		t.Fatalf("new event when already out of sync; got %v, want none", lastEvent)
 	}
 
 	lastEvent = nil
-	f.UpdateStreamA(xia, xqa, nil, false)
-	f.UpdateStreamB(xib, xqb, nil, false)
+	f.StreamACallback(xia, xqa, nil, false)
+	f.StreamBCallback(xib, xqb, nil, false)
 	if lastEvent == nil {
 		t.Fatal("expected sync event; got none")
 	}
@@ -118,8 +118,8 @@ func TestSynchro(t *testing.T) {
 	}
 
 	lastEvent = nil
-	f.UpdateStreamA(xia, xqa, nil, false)
-	f.UpdateStreamB(xib[:10], xqb[:10], nil, false)
+	f.StreamACallback(xia, xqa, nil, false)
+	f.StreamBCallback(xib[:10], xqb[:10], nil, false)
 	if lastEvent == nil {
 		t.Fatal("expected out of sync event; got none")
 	}
@@ -133,12 +133,12 @@ func TestSynchro(t *testing.T) {
 		t.Fatalf("wrong event type; got %v, want %v", lastEvent, SynchroOutOfSync)
 	}
 
-	f.UpdateStreamA(xia, xqa, nil, false)
-	f.UpdateStreamB(xib, xqb, nil, false)
+	f.StreamACallback(xia, xqa, nil, false)
+	f.StreamBCallback(xib, xqb, nil, false)
 
 	lastEvent = nil
-	f.UpdateStreamA(xia, xqa, nil, false)
-	f.UpdateStreamA(xia, xqa, nil, false)
+	f.StreamACallback(xia, xqa, nil, false)
+	f.StreamACallback(xia, xqa, nil, false)
 	if lastEvent == nil {
 		t.Fatal("expected out of sync event; got none")
 	}
@@ -152,11 +152,11 @@ func TestSynchro(t *testing.T) {
 		t.Fatalf("wrong event type; got %v, want %v", lastEvent, SynchroOutOfSync)
 	}
 
-	f.UpdateStreamA(xia, xqa, nil, false)
-	f.UpdateStreamB(xib, xqb, nil, false)
+	f.StreamACallback(xia, xqa, nil, false)
+	f.StreamBCallback(xib, xqb, nil, false)
 
 	lastEvent = nil
-	f.UpdateStreamA(xia[:10], xqa, nil, false)
+	f.StreamACallback(xia[:10], xqa, nil, false)
 	if lastEvent == nil {
 		t.Fatal("expected out of sync event; got none")
 	}
@@ -170,11 +170,11 @@ func TestSynchro(t *testing.T) {
 		t.Fatalf("wrong event type; got %v, want %v", lastEvent, SynchroOutOfSync)
 	}
 
-	f.UpdateStreamA(xia, xqa, nil, false)
-	f.UpdateStreamB(xib, xqb, nil, false)
+	f.StreamACallback(xia, xqa, nil, false)
+	f.StreamBCallback(xib, xqb, nil, false)
 
 	lastEvent = nil
-	f.UpdateStreamB(xib[:10], xqb, nil, false)
+	f.StreamBCallback(xib[:10], xqb, nil, false)
 	if lastEvent == nil {
 		t.Fatal("expected out of sync event; got none")
 	}
@@ -253,12 +253,12 @@ func TestSynchroLong(t *testing.T) {
 			return n
 		}
 		n := update()
-		f.UpdateStreamA(xia[:n], xqa[:n], nil, true)
-		f.UpdateStreamB(xib[:n], xqb[:n], nil, true)
+		f.StreamACallback(xia[:n], xqa[:n], nil, true)
+		f.StreamBCallback(xib[:n], xqb[:n], nil, true)
 		for total < target {
 			n = update()
-			f.UpdateStreamA(xia[:n], xqa[:n], nil, false)
-			f.UpdateStreamB(xib[:n], xqb[:n], nil, false)
+			f.StreamACallback(xia[:n], xqa[:n], nil, false)
+			f.StreamBCallback(xib[:n], xqb[:n], nil, false)
 		}
 	}
 }
@@ -281,7 +281,7 @@ func BenchmarkSynchro(b *testing.B) {
 	xqb := make([]int16, numSamples)
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
-		f.UpdateStreamA(xia, xqa, nil, true)
-		f.UpdateStreamB(xib, xqb, nil, true)
+		f.StreamACallback(xia, xqa, nil, true)
+		f.StreamBCallback(xib, xqb, nil, true)
 	}
 }

@@ -275,7 +275,7 @@ analog bandwidths of 1.536 MHz, 600 kHz, 300 kHz, and 200 kHz.
 				lg.Printf("stream A: dropped %d samples %v\n", d, reset)
 				reset = true
 			}
-			synchro.UpdateStreamA(xi, xq, params, reset)
+			synchro.StreamACallback(xi, xq, params, reset)
 		}),
 		session.WithStreamBCallback(func(xi, xq []int16, params *api.StreamCbParamsT, reset bool) {
 			select {
@@ -293,7 +293,7 @@ analog bandwidths of 1.536 MHz, 600 kHz, 300 kHz, and 200 kHz.
 				lg.Printf("stream B: dropped %d samples %v\n", d, reset)
 				reset = true
 			}
-			synchro.UpdateStreamB(xi, xq, params, reset)
+			synchro.StreamBCallback(xi, xq, params, reset)
 		}),
 		session.WithEventCallback(evtChan.Callback),
 		session.WithControlLoop(func(_ context.Context, d *api.DeviceT, a api.API) error {
