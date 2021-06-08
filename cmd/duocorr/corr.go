@@ -20,7 +20,10 @@ type Correlation struct {
 type CorrelationFn func(msg *duo.SynchroMsg) Correlation
 
 // NewCorrelationFn creates a new CorrelationFn that maintains
-// its state in internal captured buffers.
+// its state in internal captured buffers. The correlation code
+// is hand-written in order to avoid a module dependency on a
+// third-party DSP library. This is a naive brute-force
+// cross-correlation implementation.
 func NewCorrelationFn(cbSamples int) CorrelationFn {
 	const offset = 20
 	const width = offset*2 + 1
