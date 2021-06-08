@@ -1,17 +1,25 @@
 # sdrplay-go
 
-sdrplay-go is a wrapper of the SDRPlay API for the Go programming language.
-It implements direct access to the C API as well as a higher-level declarative
-API that takes advantage of features in the Go programming language.
+sdrplay-go is a Go programming language wrapper of the SDRplay API that can be
+used to access SDRplay RSP receivers. It implements direct access to the C API
+as well as a higher-level declarative API that takes advantage of features in
+the Go programming language. On Windows, Cgo is not required.
 
-On Windows, build sdrplay-go applications requires Go and the SDRPlay API.
+## Build Configuration
+
+### Linux
+On Linux, building sdrplay-go applications requires Go, the SDRplay API, and
+a Cgo-compatible C compiler. The Go environment must be configured with CGO_ENABLED=1.
+
+### Windows
+On Windows, building sdrplay-go applications requires Go and the SDRplay API.
 If CGO_ENABLED=0, sdrplay-go defaults to using runtime DLL loading instead of
 typical dynamic linking. This allows sdrplay-go applications to be compiled without
-using Cgo or requiring a C compiler. If CGO_ENABLED=1, sdrplay-go will build
-using Cgo and typical dynamic linking.
+using Cgo or requiring a C compiler.
 
-On Linux, building sdrplay-go applications requires Go, the SDRPlay API, and
-a Cgo-compatible C compiler. The Go environment must be configured with CGO_ENABLED=1.
+If CGO_ENABLED=1, sdrplay-go will build using Cgo and typical dynamic linking. To
+build with runtime DLL loading while keeping CGO_ENABLED=1, declare the "dll" tag
+during build (e.g. ```go build -tags dll ./...```).
 
 ## Quickstart
 
@@ -78,3 +86,12 @@ func main() {
 ```sh
 go run ./main.go
 ```
+```
+2021/06/07 20:51:20 Run
+2021/06/07 20:51:21 Got 1008 samples
+2021/06/07 20:51:22 context canceled
+```
+
+
+
+
