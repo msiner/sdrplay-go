@@ -186,7 +186,7 @@ analog bandwidths of 1.536 MHz, 600 kHz, 300 kHz, and 200 kHz.
 	// Write the initial WAV header with 0 samples.
 	var totalBytes uint64
 	finalFs := uint32(session.LowIFSampleRate / float64(dec))
-	head, err := wav.NewHeader(finalFs, 4, bytesPerSample, sampleFormat, *bigOpt, 0)
+	head, err := wav.NewHeader(finalFs, 4, bytesPerSample, sampleFormat, order, 0)
 	if err != nil {
 		return err
 	}

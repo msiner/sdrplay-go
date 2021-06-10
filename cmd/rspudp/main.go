@@ -6,6 +6,7 @@ package main
 
 import (
 	"context"
+	"encoding/binary"
 	"errors"
 	"flag"
 	"fmt"
@@ -182,6 +183,11 @@ This will use 8 bytes of the specified payload size.`,
 		duoTunerFilter = session.WithDuoTunerEither()
 	}
 
+	var order binary.ByteOrder = binary.LittleEndian
+	if *bigOpt {
+		order = binary.BigEndian
+	}
+
 	addr, err := net.ResolveUDPAddr("udp", *remoteOpt)
 	if err != nil {
 		return err
@@ -202,7 +208,7 @@ This will use 8 bytes of the specified payload size.`,
 	log.Printf("Payload Size: %d B", *payOpt)
 
 	// Setup callback and control state.
-	write, err := udp.NewPacketWriteFn(*payOpt, 2, *seqOpt, *bigOpt)
+	write, err := udp.NewPacketWriteFn(*payOpt, 2, *seqOpt, order)
 	if err != nil {
 		return err
 	}

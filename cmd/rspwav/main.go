@@ -223,7 +223,7 @@ the sample rate.`,
 		finalFs = uint32(session.LowIFSampleRate / float64(dec))
 	}
 
-	head, err := wav.NewHeader(finalFs, 2, bytesPerSample, sampleFormat, *bigOpt, 0)
+	head, err := wav.NewHeader(finalFs, 2, bytesPerSample, sampleFormat, order, 0)
 	if err != nil {
 		return err
 	}

@@ -32,7 +32,7 @@ import (
 type PacketWriteFn func(out io.Writer, x []int16) (int, error)
 
 // NewUDPPacketWrite creates a new UDPPacketWriteFn.
-func NewPacketWriteFn(payloadLen, scalarsPerFrame uint, seqHeader, bigEndian bool) (PacketWriteFn, error) {
+func NewPacketWriteFn(payloadLen, scalarsPerFrame uint, seqHeader bool, order binary.ByteOrder) (PacketWriteFn, error) {
 	const (
 		sizeofScalar = 2
 		sizeofHeader = 8
@@ -65,30 +65,59 @@ func NewPacketWriteFn(payloadLen, scalarsPerFrame uint, seqHeader, bigEndian boo
 			return 0, fmt.Errorf("invalid number of scalars; got %d, want multiple of %d", len(x), scalarsPerFrame)
 		}
 		var total int
-		for i := range x {
-			switch bigEndian {
-			case true:
+		switch order {
+		case binary.BigEndian:
+			for i := range x {
 				binary.BigEndian.PutUint16(buf[bi:], uint16(x[i]))
-			default:
-				binary.LittleEndian.PutUint16(buf[bi:], uint16(x[i]))
-			}
-			total += sizeofScalar
-			bi += sizeofScalar
-			if bi == int(payloadLen) {
-				_, err := out.Write(buf)
-				if err != nil {
-					return total, err
-				}
-				bi = 0
-				if seqHeader {
-					switch bigEndian {
-					case true:
-						binary.BigEndian.PutUint64(buf, seq)
-					default:
-						binary.LittleEndian.PutUint64(buf, seq)
+				total += sizeofScalar
+				bi += sizeofScalar
+				if bi == int(payloadLen) {
+					_, err := out.Write(buf)
+					if err != nil {
+						return total, err
 					}
-					bi += sizeofHeader
-					seq++
+					bi = 0
+					if seqHeader {
+						binary.BigEndian.PutUint64(buf, seq)
+						bi += sizeofHeader
+						seq++
+					}
+				}
+			}
+		case binary.LittleEndian:
+			for i := range x {
+				binary.LittleEndian.PutUint16(buf[bi:], uint16(x[i]))
+				total += sizeofScalar
+				bi += sizeofScalar
+				if bi == int(payloadLen) {
+					_, err := out.Write(buf)
+					if err != nil {
+						return total, err
+					}
+					bi = 0
+					if seqHeader {
+						binary.LittleEndian.PutUint64(buf, seq)
+						bi += sizeofHeader
+						seq++
+					}
+				}
+			}
+		default:
+			for i := range x {
+				order.PutUint16(buf[bi:], uint16(x[i]))
+				total += sizeofScalar
+				bi += sizeofScalar
+				if bi == int(payloadLen) {
+					_, err := out.Write(buf)
+					if err != nil {
+						return total, err
+					}
+					bi = 0
+					if seqHeader {
+						order.PutUint64(buf, seq)
+						bi += sizeofHeader
+						seq++
+					}
 				}
 			}
 		}

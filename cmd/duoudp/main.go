@@ -6,6 +6,7 @@ package main
 
 import (
 	"context"
+	"encoding/binary"
 	"errors"
 	"flag"
 	"fmt"
@@ -151,6 +152,11 @@ analog bandwidths of 1.536 MHz, 600 kHz, 300 kHz, and 200 kHz.
 		serialsFilter = session.WithSerials(serials...)
 	}
 
+	var order binary.ByteOrder = binary.LittleEndian
+	if *bigOpt {
+		order = binary.BigEndian
+	}
+
 	addr, err := net.ResolveUDPAddr("udp", *remoteOpt)
 	if err != nil {
 		return err
@@ -171,7 +177,7 @@ analog bandwidths of 1.536 MHz, 600 kHz, 300 kHz, and 200 kHz.
 	lg.Printf("Payload Size: %d B", *payOpt)
 
 	// Setup callback and control state.
-	write, err := udp.NewPacketWriteFn(*payOpt, 4, *seqOpt, *bigOpt)
+	write, err := udp.NewPacketWriteFn(*payOpt, 4, *seqOpt, order)
 	if err != nil {
 		return err
 	}

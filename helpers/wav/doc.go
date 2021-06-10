@@ -2,12 +2,8 @@
 // Use of this source code is governed by a MIT-style
 // license that can be found in the LICENSE file.
 
-// +build ppc64 mips mips64 s390x
-
+/*
+Package wav implements basic WAV file header creation useful
+for writing WAV files.
+*/
 package wav
-
-import "encoding/binary"
-
-const IsBigEndian = true
-
-var NativeOrder = binary.BigEndian

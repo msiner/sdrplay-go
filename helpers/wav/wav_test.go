@@ -12,7 +12,7 @@ import (
 )
 
 func TestHeader(t *testing.T) {
-	h, err := NewHeader(20000, 1, 2, LPCM, false, 0)
+	h, err := NewHeader(20000, 1, 2, LPCM, binary.LittleEndian, 0)
 	if err != nil {
 		t.Fatalf("unexpected error; %v", err)
 	}
@@ -41,7 +41,7 @@ func TestHeader(t *testing.T) {
 		t.Fatalf("wrong data chunk size; got %d, want 4", h.Data.ChunkSize)
 	}
 
-	hb, err := NewHeader(20000, 1, 2, LPCM, true, 0)
+	hb, err := NewHeader(20000, 1, 2, LPCM, binary.BigEndian, 0)
 	if err != nil {
 		t.Fatalf("unexpected error; %v", err)
 	}
@@ -58,7 +58,7 @@ func TestHeader(t *testing.T) {
 		t.Fatalf("wrong magic number in header bytes; got %s, want RIFX", magicb)
 	}
 
-	hf, err := NewHeader(20000, 1, 4, IEEEFloatingPoint, true, 0)
+	hf, err := NewHeader(20000, 1, 4, IEEEFloatingPoint, binary.BigEndian, 0)
 	if err != nil {
 		t.Fatalf("unexpected error; %v", err)
 	}
@@ -78,7 +78,7 @@ func TestHeader(t *testing.T) {
 		t.Fatalf("wrong data chunk size; got %d, want 8", hf.Data.ChunkSize)
 	}
 
-	_, err = NewHeader(20000, 1, 5, LPCM, true, 0)
+	_, err = NewHeader(20000, 1, 5, LPCM, binary.BigEndian, 0)
 	if err == nil {
 		t.Fatal("unexpected success on invalid bytes per sample")
 	}
@@ -86,7 +86,7 @@ func TestHeader(t *testing.T) {
 		t.Errorf("wrong error message; got '%s', want 'bytes per sample'", err.Error())
 	}
 
-	_, err = NewHeader(20000, 1, 2, IEEEFloatingPoint, true, 0)
+	_, err = NewHeader(20000, 1, 2, IEEEFloatingPoint, binary.BigEndian, 0)
 	if err == nil {
 		t.Fatal("unexpected success on invalid bytes per sample")
 	}
@@ -94,7 +94,7 @@ func TestHeader(t *testing.T) {
 		t.Errorf("wrong error message; got '%s', want 'bytes per sample'", err.Error())
 	}
 
-	_, err = NewHeader(20000, 1, 2, 0, true, 0)
+	_, err = NewHeader(20000, 1, 2, 0, binary.BigEndian, 0)
 	if err == nil {
 		t.Fatal("unexpected success on invalid sample format")
 	}
