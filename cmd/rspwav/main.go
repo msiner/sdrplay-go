@@ -362,18 +362,18 @@ the sample rate.`,
 		session.WithEventCallback(func(eventId api.EventT, tuner api.TunerSelectT, params *api.EventParamsT) {
 			switch eventId {
 			case api.GainChange:
-				p := params.GainParams()
+				p := params.GainParams
 				log.Printf(
 					"EventID=%v Tuner=%v GRdB=%d LNAGRdB=%d SystemGain=%.02f\n",
 					eventId, tuner, p.GRdB, p.LnaGRdB, p.CurrGain,
 				)
 			case api.PowerOverloadChange:
-				p := params.PowerOverloadParams()
+				p := params.PowerOverloadParams
 				log.Printf("EventID=%v Tuner=%v Type=%v\n", eventId, tuner, p.PowerOverloadChangeType)
 			case api.DeviceRemoved:
 				log.Printf("EventID=%v Tuner=%v\n", eventId, tuner)
 			case api.RspDuoModeChange:
-				p := params.RspDuoModeParams()
+				p := params.RspDuoModeParams
 				log.Printf("EventID=%v Tuner=%v Type=%v\n", eventId, tuner, p.ModeChangeType)
 			default:
 				log.Printf("EventID=%v Tuner=%v\n", eventId, tuner)

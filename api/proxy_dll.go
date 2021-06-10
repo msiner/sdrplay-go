@@ -101,7 +101,11 @@ func eventCallback(eventId, tuner uintptr, params, cbContext unsafe.Pointer) uin
 
 	var evParams *EventParamsT
 	if params != nil {
-		evParams = (*EventParamsT)(unsafe.Pointer(params))
+		evParams = &EventParamsT{
+			GainParams:          *(*GainCbParamT)(params),
+			PowerOverloadParams: *(*PowerOverloadCbParamT)(params),
+			RspDuoModeParams:    *(*RspDuoModeCbParamT)(params),
+		}
 	}
 
 	cb(EventT(eventId), TunerSelectT(tuner), evParams)

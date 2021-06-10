@@ -36,7 +36,7 @@ func TestEventChanSync(t *testing.T) {
 
 	wait := make(chan struct{})
 	params := &api.EventParamsT{}
-	params.GainParams().CurrGain = 42
+	params.GainParams.CurrGain = 42
 	go func() {
 		<-wait
 		// Yield to ensure the reader gets to select.
@@ -57,8 +57,8 @@ func TestEventChanSync(t *testing.T) {
 		if msg.EventId != api.PowerOverloadChange {
 			t.Errorf("wrong EventId; got %v, want %v", msg.EventId, api.PowerOverloadChange)
 		}
-		if msg.Params.GainParams().CurrGain != params.GainParams().CurrGain {
-			t.Fatalf("wrong params; got %v, want %v", msg.Params.GainParams(), msg.Params.GainParams())
+		if msg.Params.GainParams.CurrGain != params.GainParams.CurrGain {
+			t.Fatalf("wrong params; got %v, want %v", msg.Params.GainParams, msg.Params.GainParams)
 		}
 	case <-tmr.C:
 		t.Fatal("synchronous event read failed")
@@ -103,7 +103,7 @@ func TestEventChanAsync(t *testing.T) {
 	defer ec.Close()
 
 	params := &api.EventParamsT{}
-	params.GainParams().CurrGain = 42
+	params.GainParams.CurrGain = 42
 	ec.Callback(api.DeviceRemoved, api.Tuner_A, params)
 	ec.Callback(api.RspDuoModeChange, api.Tuner_Both, params)
 	ec.Callback(api.PowerOverloadChange, api.Tuner_B, params)
@@ -116,8 +116,8 @@ func TestEventChanAsync(t *testing.T) {
 		if msg.EventId != api.DeviceRemoved {
 			t.Errorf("wrong EventId; got %v, want %v", msg.EventId, api.DeviceRemoved)
 		}
-		if msg.Params.GainParams().CurrGain != params.GainParams().CurrGain {
-			t.Fatalf("wrong params; got %v, want %v", msg.Params.GainParams(), msg.Params.GainParams())
+		if msg.Params.GainParams.CurrGain != params.GainParams.CurrGain {
+			t.Fatalf("wrong params; got %v, want %v", msg.Params.GainParams, msg.Params.GainParams)
 		}
 	default:
 		t.Fatalf("no async message")
@@ -131,8 +131,8 @@ func TestEventChanAsync(t *testing.T) {
 		if msg.EventId != api.RspDuoModeChange {
 			t.Errorf("wrong EventId; got %v, want %v", msg.EventId, api.RspDuoModeChange)
 		}
-		if msg.Params.GainParams().CurrGain != params.GainParams().CurrGain {
-			t.Fatalf("wrong params; got %v, want %v", msg.Params.GainParams(), msg.Params.GainParams())
+		if msg.Params.GainParams.CurrGain != params.GainParams.CurrGain {
+			t.Fatalf("wrong params; got %v, want %v", msg.Params.GainParams, msg.Params.GainParams)
 		}
 	default:
 		t.Fatalf("no async message")

@@ -6,10 +6,6 @@ package api
 
 //go:generate go run golang.org/x/tools/cmd/stringer -type PowerOverloadCbEventIdT,RspDuoModeCbEventIdT,EventT -output callback_string.go
 
-import (
-	"unsafe"
-)
-
 // Event callback enums
 type PowerOverloadCbEventIdT int32
 
@@ -60,18 +56,10 @@ type RspDuoModeCbParamT struct {
 // CurrGain parameters in GainCbParamT. Therefore, using [2]uint64 as
 // the base type to represent the data gives us the correct size and
 // alignment.
-type EventParamsT [2]uint64
-
-func (p *EventParamsT) GainParams() *GainCbParamT {
-	return (*GainCbParamT)(unsafe.Pointer(p))
-}
-
-func (p *EventParamsT) PowerOverloadParams() *PowerOverloadCbParamT {
-	return (*PowerOverloadCbParamT)(unsafe.Pointer(p))
-}
-
-func (p *EventParamsT) RspDuoModeParams() *RspDuoModeCbParamT {
-	return (*RspDuoModeCbParamT)(unsafe.Pointer(p))
+type EventParamsT struct {
+	GainParams          GainCbParamT
+	PowerOverloadParams PowerOverloadCbParamT
+	RspDuoModeParams    RspDuoModeCbParamT
 }
 
 // Stream callback parameter structs

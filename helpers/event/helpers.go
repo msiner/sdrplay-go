@@ -56,7 +56,7 @@ func HandlePowerOverloadChange(d *api.DeviceT, a api.API, e api.EventT, t api.Tu
 		return nil
 	}
 
-	powParams := p.PowerOverloadParams()
+	powParams := p.PowerOverloadParams
 
 	if lg != nil {
 		lg.Printf("Acknowledge ID=%v Tuner=%v Type=%v", e, t, powParams.PowerOverloadChangeType)
@@ -102,25 +102,25 @@ func HandlePowerOverloadChangeMsg(d *api.DeviceT, a api.API, evt EventMsg, lg Lo
 
 // LogEvent is a helper function for logging a basic message representing
 // the provided event.
-func LogEvent(e api.EventT, t api.TunerSelectT, p *api.EventParamsT, lg Logger) {
+func LogEvent(e api.EventT, t api.TunerSelectT, params *api.EventParamsT, lg Logger) {
 	if lg == nil {
 		return
 	}
 	switch e {
 	case api.GainChange:
-		gainParams := p.GainParams()
+		p := params.GainParams
 		lg.Printf(
 			"Event ID=%v Tuner=%v GRdB=%d LNAGRdB=%d SystemGain=%.02f\n",
-			e, t, gainParams.GRdB, gainParams.LnaGRdB, gainParams.CurrGain,
+			e, t, p.GRdB, p.LnaGRdB, p.CurrGain,
 		)
 	case api.PowerOverloadChange:
-		powParams := p.PowerOverloadParams()
-		lg.Printf("Event ID=%v Tuner=%v Type=%v\n", e, t, powParams.PowerOverloadChangeType)
+		p := params.PowerOverloadParams
+		lg.Printf("Event ID=%v Tuner=%v Type=%v\n", e, t, p.PowerOverloadChangeType)
 	case api.DeviceRemoved:
 		lg.Printf("Event ID=%v Tuner=%v\n", e, t)
 	case api.RspDuoModeChange:
-		duoParams := p.RspDuoModeParams()
-		lg.Printf("Event ID=%v Tuner=%v Type=%v\n", e, t, duoParams.ModeChangeType)
+		p := params.RspDuoModeParams
+		lg.Printf("Event ID=%v Tuner=%v Type=%v\n", e, t, p.ModeChangeType)
 	default:
 		lg.Printf("Event ID=%v Tuner=%v\n", e, t)
 	}
