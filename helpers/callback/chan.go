@@ -82,12 +82,12 @@ func (s *StreamChan) Callback(xi, xq []int16, params *api.StreamCbParamsT, reset
 
 	// Create one big buffer for a single allocation and
 	// to optimize locality.
-	buf := make([]int16, params.NumSamples*2)
+	buf := make([]int16, len(xi)*2)
 	pay := StreamMsg{
 		Reset:  reset,
 		MsgNum: s.msgNum,
-		Xi:     buf[:int(params.NumSamples)],
-		Xq:     buf[int(params.NumSamples):],
+		Xi:     buf[:len(xi)],
+		Xq:     buf[len(xi):],
 	}
 
 	s.msgNum++

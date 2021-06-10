@@ -45,7 +45,6 @@ type SynchroEventCbFn func(evt SynchroEvent, msg string)
 //    time span as the samples provided to the last stream A
 //    callback.
 type Synchro struct {
-	cbFrames    int
 	cbScalars   int
 	cb          SynchroCbFn
 	evtCb       SynchroEventCbFn
