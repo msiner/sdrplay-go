@@ -50,12 +50,10 @@ type RspDuoModeCbParamT struct {
 	ModeChangeType RspDuoModeCbEventIdT
 }
 
-// Event parameters overlay. It is hard to correctly represent a
-// C union in Go. Of the 3 union members, the largest size is GainParamsT
-// at 16 bytes. The strictest alignment is 8 bytes due to the 64-bit
-// CurrGain parameters in GainCbParamT. Therefore, using [2]uint64 as
-// the base type to represent the data gives us the correct size and
-// alignment.
+// EventParamsT represents a union type of the same name in the C API.
+// Recreating an actual union in Go tends to be ugly and unsafe.
+// Instead, the Go version of EventParamsT holds a full copy of each
+// of the union members.
 type EventParamsT struct {
 	GainParams          GainCbParamT
 	PowerOverloadParams PowerOverloadCbParamT
