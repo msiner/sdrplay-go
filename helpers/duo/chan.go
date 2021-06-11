@@ -10,13 +10,7 @@ import (
 )
 
 // SynchroMsg is a type for storing or transferring the parameters
-// of a StreamCallbackT. Specifically, sending via a chan.
-//
-// A StreamCallbackT called from the C API does not own the sample
-// buffers. If a callback stores the parameters in a SynchroMsg,
-// it must first copy the xi and xq sample buffers. Note that, since
-// Xi and Xq are slices, the SynchroMsg type itself does not have memory
-// allocated for the samples.
+// of a SynchroCbFn callback. Specifically, sending via a chan.
 type SynchroMsg struct {
 	Xia    []int16
 	Xqa    []int16
@@ -30,6 +24,10 @@ type SynchroMsg struct {
 // sends a message for each callback call that allows users to handle
 // sample data asynchronously to the C callback thread. This frees the
 // callback thread quickly to minimize dropped samples inside the API.
+//
+// SynchroChan is designed to be used with the Synchro type in this
+// package. For asynchronous handling of individual streams, see the
+// helpers/callback.StreamChan type instead.
 type SynchroChan struct {
 	C      <-chan SynchroMsg
 	c      chan<- SynchroMsg
