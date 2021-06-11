@@ -15,11 +15,17 @@ a Cgo-compatible C compiler. The Go environment must be configured with CGO_ENAB
 On Windows, building sdrplay-go applications requires Go and the SDRplay API.
 If CGO_ENABLED=0, sdrplay-go defaults to using runtime DLL loading instead of
 typical dynamic linking. This allows sdrplay-go applications to be compiled without
-using Cgo or requiring a C compiler.
+using Cgo or requiring a C compiler. In this mode, sdrplay-go will adaptively
+find the sdrplay_api.dll in either the current working directory, the same
+directory as the executable, a directory in the Path environment variable, or
+in the normal SDRplay API install location `C:\Program Files\SDRplay\API`.
 
 If CGO_ENABLED=1, sdrplay-go will build using Cgo and typical dynamic linking. To
 build with runtime DLL loading while keeping CGO_ENABLED=1, declare the "dll" tag
-during build (e.g. ```go build -tags dll ./...```).
+during build (e.g. `go build -tags dll ./...`). An application built using Cgo
+must be able to resolve the dynamic link by finding sdrplay_api.dll in either the
+current working directory, the same directory as the executable, a directory in
+the Path environment variable
 
 ## Quickstart
 
@@ -98,32 +104,37 @@ This module also provides some command-line utilities in the cmd package.
 These utilities are designed to be useful tools on their own as well as
 examples of how to use the module.
 
-1. rspdetect
+#### rspdetect
 The rspdetect command simply opens the API, requests a list of available
 devices, and then prints the information for each device.
-2. rspwav
+
+#### rspwav
 The rspwav command opens an available RSP device and configures a single
 stream. Samples are recorded to a stereo WAV file where the I component
 is left and the Q component is right.
-3. rspudp
+
+#### rspudp
 The rspudp command opens an available RSP device and configures a single
 stream. Samples are packetized into UDP payloads and sent to the configured
 destination address and port. It also supports an optional 64-bit packet
 counter at the start of each payload. Sample components are interleaved
 (e.g. I1,Q1,I2,Q2,...,IN,QN).
-4. duowav
+
+#### duowav
 The duowav command is similar to rspwav, but it uses an RSPduo device
 configured in dual-tune mode with both tuners configured identically.
 Components and samples are interleaved
 (e.g. I1a,Q1a,I1b,Q1b,...,INa,QNa,INb,QNb). In the WAV multi-channel
 audo context, this maps to Ia, Qa, Ib, and Qb as front-left, front-right,
 front-center, and low-frequency respectively.
-5. duoudp
+
+#### duoudp
 The duoudp command is similar to rspudp, but it uses and RSPduo device
 configured in dual-tuner mode with both tuners configured identically.
 Components and samples are interleaved
 (e.g. I1a,Q1a,I1b,Q1b,...,INa,QNa,INb,QNb).
-6. duocorr
+
+#### duocorr
 The duocorr command is a rudimentary tool included for testing purposes.
 It uses an RSPduo device configured in dual-tuner mode with both tuners
 configured identically. For a specified duration, it calculates a
