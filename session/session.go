@@ -28,8 +28,7 @@ type ConfigFn func(o *Session) error
 type ControlFn func(ctx context.Context, d *api.DeviceT, a api.API) error
 
 // Session is a type for storing/configuring a single session of
-// access to an RSP device. More specifically, it contains everything
-// needed by the Run() function. The members can be set directly or
+// access to an RSP device. The members can be set directly or
 // by calling NewSession with the desired options declared using the
 // WithXYZ() functions that return a ConfigFn (e.g. WithSelector).
 type Session struct {
@@ -72,6 +71,11 @@ func WithImplementation(impl api.API) ConfigFn {
 	}
 }
 
+// WithSelector creates a ConfigFn that configures the Session with
+// a DevSelectFn that applies all of the provided DevFilterFn functions
+// to filter out or reorder available devices. The DevSelectFn will
+// then select, if any are available, the first device in the filtered
+// list of devices.
 func WithSelector(filters ...DevFilterFn) ConfigFn {
 	return func(o *Session) error {
 		if o.Selector != nil {
@@ -90,6 +94,8 @@ func WithSelector(filters ...DevFilterFn) ConfigFn {
 	}
 }
 
+// WithDebug creates a ConfigFn that configures the Session to
+// have debug output enabled or disabled, as specified.
 func WithDebug(en bool) ConfigFn {
 	return func(o *Session) error {
 		o.DebugEn = en
@@ -97,6 +103,9 @@ func WithDebug(en bool) ConfigFn {
 	}
 }
 
+// WithDeviceConfig creates a ConfigFn that configures the Session
+// with a single DevConfigFn that applies all of the provided DevConfigFn
+// functions in the order they are provided.
 func WithDeviceConfig(fns ...DevConfigFn) ConfigFn {
 	return func(o *Session) error {
 		if o.DevCfg != nil {
@@ -114,6 +123,9 @@ func WithDeviceConfig(fns ...DevConfigFn) ConfigFn {
 	}
 }
 
+// WithStreamACallback creates a ConfigFn that configures the
+// Session to use the provided StreamCallbackT function as
+// the stream callback for stream A.
 func WithStreamACallback(fn api.StreamCallbackT) ConfigFn {
 	return func(o *Session) error {
 		if o.StreamACbFn != nil {
@@ -124,6 +136,9 @@ func WithStreamACallback(fn api.StreamCallbackT) ConfigFn {
 	}
 }
 
+// WithStreamBCallback creates a ConfigFn that configures the
+// Session to use the provided StreamCallbackT function as
+// the stream callback for stream B.
 func WithStreamBCallback(fn api.StreamCallbackT) ConfigFn {
 	return func(o *Session) error {
 		if o.StreamBCbFn != nil {
@@ -134,6 +149,8 @@ func WithStreamBCallback(fn api.StreamCallbackT) ConfigFn {
 	}
 }
 
+// WithEventCallback creates a ConfigFn that configures the
+// Session to use the provided EventCallbackT function.
 func WithEventCallback(fn api.EventCallbackT) ConfigFn {
 	return func(o *Session) error {
 		if o.EventCbFn != nil {
@@ -146,7 +163,9 @@ func WithEventCallback(fn api.EventCallbackT) ConfigFn {
 
 // WithControlLoop configures the provided function as the control
 // loop. This function will be called after Init(). When the function
-// returns, Uninit() will be called and Run() will exit.
+// returns, Uninit() will be called and Run() will exit. A control loop
+// function is not necessary. If a control loop function is not
+// provided, Run will wait on the Context until it is canceled.
 func WithControlLoop(fn ControlFn) ConfigFn {
 	return func(o *Session) error {
 		if o.Control != nil {
@@ -157,6 +176,11 @@ func WithControlLoop(fn ControlFn) ConfigFn {
 	}
 }
 
+// Run runs the configured Session. The provided Context is passed to the
+// control loop function if one is provided. If no control loop has been
+// provided, Run will wait on the ctx.Done() channel. Therfore, this
+// function will block until an error is encountered, the control loop
+// exits, and/or the Context is canceled.
 func (s *Session) Run(ctx context.Context) error {
 	impl := s.Impl
 	if impl == nil {
@@ -174,6 +198,9 @@ func (s *Session) Run(ctx context.Context) error {
 	}
 	defer impl.Close()
 
+	// Encapsulate device selection in a separate function so we can
+	// do LockDeviceApi and then defer UnlockDeviceApi to cleanup
+	// after device selection regardless of success or failure.
 	selectDevice := func() (*api.DeviceT, error) {
 		if err := impl.LockDeviceApi(); err != nil {
 			return nil, fmt.Errorf("failed to lock API: %v", impl.GetLastError(nil))
@@ -252,6 +279,7 @@ func (s *Session) Run(ctx context.Context) error {
 
 	switch s.Control {
 	case nil:
+		// No control loop provided, just wait on the context.
 		<-ctx.Done()
 		return ctx.Err()
 	default:
@@ -259,6 +287,8 @@ func (s *Session) Run(ctx context.Context) error {
 	}
 }
 
+// Run is a simplified wrapper around calling NewSession, checking for
+// and error, and then calling Session.Run.
 func Run(ctx context.Context, fns ...ConfigFn) error {
 	s, err := NewSession(fns...)
 	if err != nil {
