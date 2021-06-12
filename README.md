@@ -1,9 +1,10 @@
 # sdrplay-go
 
 sdrplay-go is a Go programming language wrapper of the SDRplay service based API
-that can be used to access SDRplay RSP receivers. It implements direct access to
-the C API as well as a higher-level declarative API that takes advantage of features
-in the Go programming language. On Windows, Cgo is not required.
+(version 3.0 and greater) that can be used to access SDRplay RSP receivers. It
+implements direct access to the C API as well as a higher-level declarative API
+that takes advantage of features in the Go programming language. On Windows, Cgo
+is not required.
 
 ## Build Configuration
 
