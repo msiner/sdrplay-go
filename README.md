@@ -102,12 +102,12 @@ go run ./main.go
 ## Device Support
 
 This library has been tested with the following devices. If you verify
-either correct or incorrect operation with an device not listed here,
+either correct or incorrect operation with a device not listed here,
 please open an issue to share your experience.
 
 - SDRplay RSPduo
 
-## License
+## Legal
 
 Use of this source code is governed by a MIT-style license that can be
 found in the LICENSE file.
