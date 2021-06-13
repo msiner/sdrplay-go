@@ -12,12 +12,26 @@ import (
 	"github.com/msiner/sdrplay-go/api"
 )
 
+// SynchroEvent is a simple enum type to represent the various event types
+// that Synchro can emit.
 type SynchroEvent int
 
 const (
+	// SynchroMessage specifies an informational event for logging purposes.
 	SynchroMessage SynchroEvent = iota
+	// SynchroReset specifies that the Synchro has been reset and there is
+	// a break in continuity between sample data before the event and
+	// sample data after the event. A reset happens when the C API specifies
+	// a reset to the stream callback or when the user calls the Reset
+	// function.
 	SynchroReset
+	// SynchroSync specifies that the Synchro has reached a synchronized
+	// state between the two stream callbacks.
 	SynchroSync
+	// SynchroOutOfSync specifies that the Synchro has detected a loss of
+	// synchronization between the two stream callbacks. After a loss of
+	// synchronization this event will not be reported again until after
+	// synchronization is restored and a SynchroSync event is emitted.
 	SynchroOutOfSync
 )
 
@@ -127,7 +141,7 @@ func (f *Synchro) doEvent(evt SynchroEvent, msg string) {
 	}
 }
 
-// UpdateStreamA is an implementation of StreamCallbackT bound to a
+// StreamACallback is an implementation of StreamCallbackT bound to a
 // Synchro instance. It can be provided directly as the stream callback
 // or called inside a user implementation of StreamCallbackT. It updates
 // the internal stream A buffers with the provided samples after verifying
@@ -170,7 +184,7 @@ func (f *Synchro) StreamACallback(xi, xq []int16, params *api.StreamCbParamsT, r
 	}
 }
 
-// UpdateStreamB is an implementation of StreamCallbackT bound to a
+// StreamBCallback is an implementation of StreamCallbackT bound to a
 // Synchro instance. It can be provided directly as the stream callback
 // or called inside a user implementation of StreamCallbackT. It updates
 // the internal stream B buffers with the provided samples after verifying

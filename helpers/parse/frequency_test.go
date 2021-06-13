@@ -49,7 +49,7 @@ func TestParseFrequency(t *testing.T) {
 	}
 
 	for _, spec := range specs {
-		val, err := ParseFrequency(spec.txt)
+		val, err := Frequency(spec.txt)
 		switch {
 		case spec.valid && err != nil:
 			t.Errorf("parse error on valid input; %v", err)

@@ -44,7 +44,7 @@ func TestParseSize(t *testing.T) {
 	}
 
 	for _, spec := range specs {
-		val, err := ParseSize(spec.txt)
+		val, err := SizeInBytes(spec.txt)
 		switch {
 		case spec.valid && err != nil:
 			t.Errorf("parse error on valid input; %v", err)

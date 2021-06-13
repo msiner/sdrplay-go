@@ -109,7 +109,7 @@ analog bandwidths of 1.536 MHz, 600 kHz, 300 kHz, and 200 kHz.
 
 	lg := log.New(os.Stdout, "", log.LstdFlags)
 
-	freq, err := parse.ParseTuneFrequency(flags.Arg(0))
+	freq, err := parse.TuneFrequency(flags.Arg(0))
 	if err != nil {
 		return err
 	}
@@ -118,32 +118,32 @@ analog bandwidths of 1.536 MHz, 600 kHz, 300 kHz, and 200 kHz.
 		return err
 	}
 
-	dec, err := parse.CheckDecFlag(*decOpt)
+	dec, err := parse.DecFlag(*decOpt)
 	if err != nil {
 		return err
 	}
 
-	warm, err := parse.ParseWarmFlag(*warmOpt)
+	warm, err := parse.WarmFlag(*warmOpt)
 	if err != nil {
 		return err
 	}
 
-	agcCtl, err := parse.ParseAGCCtlFlag(*agcCtlOpt)
+	agcCtl, err := parse.AGCCtlFlag(*agcCtlOpt)
 	if err != nil {
 		return err
 	}
 
-	agcSet, err := parse.ParseAGCSetFlag(*agcSetOpt)
+	agcSet, err := parse.AGCSetFlag(*agcSetOpt)
 	if err != nil {
 		return err
 	}
 
-	usb, err := parse.ParseUSBFlag(*usbOpt)
+	usb, err := parse.USBFlag(*usbOpt)
 	if err != nil {
 		return err
 	}
 
-	lnaState, lnaPct, err := parse.CheckLNAFlag(*lnaOpt)
+	lnaState, lnaPct, err := parse.LNAFlag(*lnaOpt)
 	lnaCfg := session.NoopChanConfig
 	switch {
 	case err != nil:
@@ -154,7 +154,7 @@ analog bandwidths of 1.536 MHz, 600 kHz, 300 kHz, and 200 kHz.
 		lnaCfg = session.WithLNAPercent(*lnaPct)
 	}
 
-	serials, err := parse.ParseSerialsFlag(*serialsOpt)
+	serials, err := parse.SerialsFlag(*serialsOpt)
 	if err != nil {
 		return err
 	}
@@ -162,7 +162,7 @@ analog bandwidths of 1.536 MHz, 600 kHz, 300 kHz, and 200 kHz.
 	var serialsFilter session.DevFilterFn
 	switch serials {
 	case nil:
-		serialsFilter = session.WithNoopDevFilter()
+		serialsFilter = session.NoopDevFilter
 	default:
 		serialsFilter = session.WithSerials(serials...)
 	}
@@ -207,7 +207,7 @@ analog bandwidths of 1.536 MHz, 600 kHz, 300 kHz, and 200 kHz.
 		}
 	}()
 
-	evtChan := event.NewEventChan(10)
+	evtChan := event.NewChan(10)
 	defer evtChan.Close()
 
 	syncChan := duo.NewSynchroChan(1000)
@@ -346,7 +346,7 @@ analog bandwidths of 1.536 MHz, 600 kHz, 300 kHz, and 200 kHz.
 				case <-ctx.Done():
 					return nil
 				case evt := <-evtChan.C:
-					event.LogEventMsg(evt, lg)
+					event.LogMsg(evt, lg)
 					err := event.HandlePowerOverloadChangeMsg(d, a, evt, lg, true)
 					if err != nil {
 						lg.Printf("failed to handle power overload event; %v", err)

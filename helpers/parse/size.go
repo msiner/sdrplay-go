@@ -9,14 +9,14 @@ import (
 	"strings"
 )
 
-// ParseSize is a helper function to parse a size in bytes
+// SizeInBytes is a helper function to parse a size in bytes
 // specified as a command-line argument. For convenience, valid
 // arguments can have a suffix of k, K, m, M, g, or G to indicate
 // the value is in KiB, MiB, or GiB respectively (e.g. 10M). Any
 // text before such a prefix must represent a valid unsigned integer
 // value as parsed by strconv.ParseUint(). The return value is the
 // parsed size in bytes.
-func ParseSize(arg string) (uint64, error) {
+func SizeInBytes(arg string) (uint64, error) {
 	var mult uint64 = 1
 	arg = strings.ToLower(arg)
 	switch {

@@ -13,7 +13,7 @@ import (
 )
 
 func TestEventChanSync(t *testing.T) {
-	ec := NewEventChan(0)
+	ec := NewChan(0)
 	defer ec.Close()
 
 	ec.Callback(api.DeviceRemoved, api.Tuner_A, nil)
@@ -54,8 +54,8 @@ func TestEventChanSync(t *testing.T) {
 			t.Errorf("wrong MsgNum; got %d, want 2", msg.MsgNum)
 		}
 		// Ensure it is not one of the earlier DeviceRemoved messages
-		if msg.EventId != api.PowerOverloadChange {
-			t.Errorf("wrong EventId; got %v, want %v", msg.EventId, api.PowerOverloadChange)
+		if msg.EventID != api.PowerOverloadChange {
+			t.Errorf("wrong EventID; got %v, want %v", msg.EventID, api.PowerOverloadChange)
 		}
 		if msg.Params.GainParams.CurrGain != params.GainParams.CurrGain {
 			t.Fatalf("wrong params; got %v, want %v", msg.Params.GainParams, msg.Params.GainParams)
@@ -99,7 +99,7 @@ func TestEventChanSync(t *testing.T) {
 }
 
 func TestEventChanAsync(t *testing.T) {
-	ec := NewEventChan(2)
+	ec := NewChan(2)
 	defer ec.Close()
 
 	params := &api.EventParamsT{}
@@ -113,8 +113,8 @@ func TestEventChanAsync(t *testing.T) {
 		if msg.MsgNum != 0 {
 			t.Errorf("wrong MsgNum; got %d, want 0", msg.MsgNum)
 		}
-		if msg.EventId != api.DeviceRemoved {
-			t.Errorf("wrong EventId; got %v, want %v", msg.EventId, api.DeviceRemoved)
+		if msg.EventID != api.DeviceRemoved {
+			t.Errorf("wrong EventID; got %v, want %v", msg.EventID, api.DeviceRemoved)
 		}
 		if msg.Params.GainParams.CurrGain != params.GainParams.CurrGain {
 			t.Fatalf("wrong params; got %v, want %v", msg.Params.GainParams, msg.Params.GainParams)
@@ -128,8 +128,8 @@ func TestEventChanAsync(t *testing.T) {
 		if msg.MsgNum != 1 {
 			t.Errorf("wrong MsgNum; got %d, want 1", msg.MsgNum)
 		}
-		if msg.EventId != api.RspDuoModeChange {
-			t.Errorf("wrong EventId; got %v, want %v", msg.EventId, api.RspDuoModeChange)
+		if msg.EventID != api.RspDuoModeChange {
+			t.Errorf("wrong EventID; got %v, want %v", msg.EventID, api.RspDuoModeChange)
 		}
 		if msg.Params.GainParams.CurrGain != params.GainParams.CurrGain {
 			t.Fatalf("wrong params; got %v, want %v", msg.Params.GainParams, msg.Params.GainParams)
@@ -156,8 +156,8 @@ func TestEventChanAsync(t *testing.T) {
 		if msg.MsgNum != 3 {
 			t.Errorf("wrong MsgNum; got %d, want 3", msg.MsgNum)
 		}
-		if msg.EventId != api.PowerOverloadChange {
-			t.Errorf("wrong EventId; got %v, want %v", msg.EventId, api.PowerOverloadChange)
+		if msg.EventID != api.PowerOverloadChange {
+			t.Errorf("wrong EventID; got %v, want %v", msg.EventID, api.PowerOverloadChange)
 		}
 	default:
 		t.Fatalf("no async message")
@@ -168,8 +168,8 @@ func TestEventChanAsync(t *testing.T) {
 		if msg.MsgNum != 4 {
 			t.Errorf("wrong MsgNum; got %d, want 4", msg.MsgNum)
 		}
-		if msg.EventId != api.RspDuoModeChange {
-			t.Errorf("wrong EventId; got %v, want %v", msg.EventId, api.RspDuoModeChange)
+		if msg.EventID != api.RspDuoModeChange {
+			t.Errorf("wrong EventID; got %v, want %v", msg.EventID, api.RspDuoModeChange)
 		}
 	default:
 		t.Fatalf("no async message")

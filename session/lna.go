@@ -11,6 +11,8 @@ import (
 	"github.com/msiner/sdrplay-go/api"
 )
 
+// GetMaxLNAState returns the maximum allowed value for the LNA state for
+// the provided device and current configuration.
 func GetMaxLNAState(d *api.DeviceT, p *api.DeviceParamsT, c *api.RxChannelParamsT) uint8 {
 	if c == nil {
 		return 0
@@ -83,6 +85,9 @@ func GetMaxLNAState(d *api.DeviceT, p *api.DeviceParamsT, c *api.RxChannelParams
 	}
 }
 
+// SetLNAState sets the LNAstate value in the given RxChannelParamsT. It
+// returns an error if the requested state is greater than the maximum allowed
+// state as reported by GetMaxLNAState.
 func SetLNAState(d *api.DeviceT, p *api.DeviceParamsT, c *api.RxChannelParamsT, val uint8) error {
 	max := GetMaxLNAState(d, p, p.RxChannelA)
 	if val > max {
@@ -100,6 +105,9 @@ func WithLNAState(val uint8) ChanConfigFn {
 	}
 }
 
+// GetLNAPercent returns the approximate percent of available LNA gain
+// currently configured for the provided device and channel. The result
+// value is percentage represented as a floating-point value from 0 to 1.
 func GetLNAPercent(d *api.DeviceT, p *api.DeviceParamsT, c *api.RxChannelParamsT) (float64, error) {
 	if c == nil {
 		return 0, errors.New("cannot inspect nil channel")
@@ -112,6 +120,10 @@ func GetLNAPercent(d *api.DeviceT, p *api.DeviceParamsT, c *api.RxChannelParamsT
 	return float64(max-val) / float64(max), nil
 }
 
+// SetLNAPercent sets the LNAstate value in the given RxChannelParamsT to the
+// requested percentage of available LNA gain. The provided percentage value
+// must be in the range from 0 to 1. An error is returned if it is not
+// in that range.
 func SetLNAPercent(d *api.DeviceT, p *api.DeviceParamsT, c *api.RxChannelParamsT, pct float64) error {
 	if c == nil {
 		return errors.New("cannot configure nil channel")
@@ -125,6 +137,10 @@ func SetLNAPercent(d *api.DeviceT, p *api.DeviceParamsT, c *api.RxChannelParamsT
 	return nil
 }
 
+// WithLNAPercent creates a ChanConfigFn that configures the channel
+// LNA gain to the specified percentage. The provided percentage value
+// must be in the range from 0 to 1. An error is returned by the
+// ChanConfigFn if it is not in that range.
 func WithLNAPercent(pct float64) ChanConfigFn {
 	return func(d *api.DeviceT, p *api.DeviceParamsT, c *api.RxChannelParamsT) error {
 		return SetLNAPercent(d, p, c, pct)

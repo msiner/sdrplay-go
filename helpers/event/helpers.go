@@ -44,8 +44,8 @@ func GetRelatedParams(d *api.DeviceT, a api.API, e api.EventT, t api.TunerSelect
 
 // GetRelatedParamsMsg is a wrapper around GetRelatedParams for easy
 // use with EventChan.
-func GetRelatedParamsMsg(d *api.DeviceT, a api.API, evt EventMsg) (*api.DeviceParamsT, []*api.RxChannelParamsT, error) {
-	return GetRelatedParams(d, a, evt.EventId, evt.Tuner, &evt.Params)
+func GetRelatedParamsMsg(d *api.DeviceT, a api.API, evt Msg) (*api.DeviceParamsT, []*api.RxChannelParamsT, error) {
+	return GetRelatedParams(d, a, evt.EventID, evt.Tuner, &evt.Params)
 }
 
 // HandlePowerOverloadChange is a helper function to automatically handle
@@ -96,8 +96,8 @@ func HandlePowerOverloadChange(d *api.DeviceT, a api.API, e api.EventT, t api.Tu
 
 // HandlePowerOverloadChangeMsg is a wrapper around HandlePowerOverloadChange
 // for easy use with EventChan.
-func HandlePowerOverloadChangeMsg(d *api.DeviceT, a api.API, evt EventMsg, lg Logger, adjust bool) error {
-	return HandlePowerOverloadChange(d, a, evt.EventId, evt.Tuner, &evt.Params, lg, adjust)
+func HandlePowerOverloadChangeMsg(d *api.DeviceT, a api.API, evt Msg, lg Logger, adjust bool) error {
+	return HandlePowerOverloadChange(d, a, evt.EventID, evt.Tuner, &evt.Params, lg, adjust)
 }
 
 // LogEvent is a helper function for logging a basic message representing
@@ -126,7 +126,7 @@ func LogEvent(e api.EventT, t api.TunerSelectT, params *api.EventParamsT, lg Log
 	}
 }
 
-// LogEventMsg is a wrapper around LogEvent for use with EventChan.
-func LogEventMsg(evt EventMsg, lg Logger) {
-	LogEvent(evt.EventId, evt.Tuner, &evt.Params, lg)
+// LogMsg is a wrapper around LogEvent for use with EventChan.
+func LogMsg(evt Msg, lg Logger) {
+	LogEvent(evt.EventID, evt.Tuner, &evt.Params, lg)
 }

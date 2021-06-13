@@ -10,14 +10,14 @@ import (
 	"strings"
 )
 
-// ParseFrequency is a helper function to parse a frequency value
+// Frequency is a helper function to parse a frequency value
 // specified as a command-line argument. For convenience, valid
 // arguments can have a suffix of k, K, m, M, g, or G to indicate
 // the value is in kHz, MHz, or GHz respectively (e.g. 1.42G). Any
 // text before such a prefix must represent a valid floating point
 // value as parsed by strconv.ParseFloat(). The return value is the
 // parsed frequency in Hz.
-func ParseFrequency(arg string) (float64, error) {
+func Frequency(arg string) (float64, error) {
 	var mult float64 = 1
 	arg = strings.ToLower(arg)
 	switch {
@@ -40,12 +40,12 @@ func ParseFrequency(arg string) (float64, error) {
 	return freq * mult, nil
 }
 
-// ParseTuneFrequency is a wrapper around ParseFrequency that also guarantees
+// TuneFrequency is a wrapper around Frequency that also guarantees
 // the result is a valid tune frequency for RSP hardware. Specifically, it
 // will return an error if the frequency is less than 1 kHz or greater than
 // 2 GHz.
-func ParseTuneFrequency(arg string) (float64, error) {
-	freq, err := ParseFrequency(arg)
+func TuneFrequency(arg string) (float64, error) {
+	freq, err := Frequency(arg)
 	if err != nil {
 		return 0, err
 	}
@@ -55,12 +55,12 @@ func ParseTuneFrequency(arg string) (float64, error) {
 	return freq, nil
 }
 
-// ParseSampleRate is a wrapper around ParseFrequency that also guarantees
+// SampleRate is a wrapper around Frequency that also guarantees
 // the result is a valid sample rate for RSP hardware. Specifically, it
 // will return an error if the rate is less than 2 MHz or greater than
 // 10 MHz.
-func ParseSampleRate(arg string) (float64, error) {
-	freq, err := ParseFrequency(arg)
+func SampleRate(arg string) (float64, error) {
+	freq, err := Frequency(arg)
 	if err != nil {
 		return 0, err
 	}

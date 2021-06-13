@@ -14,7 +14,7 @@ import (
 	"io"
 )
 
-// UDPPacketWriteFn is a function type that writes the provided samples to
+// PacketWriteFn is a function type that writes the provided samples to
 // a packet buffer and, when the packet is filled, writes the packet to the
 // provided io.Writer. It returns the number of bytes written to the packet
 // buffer. The function will only write to the io.Writer when a full packet
@@ -35,7 +35,7 @@ import (
 // and false for little-endian.
 type PacketWriteFn func(out io.Writer, x []int16) (int, error)
 
-// NewUDPPacketWrite creates a new UDPPacketWriteFn.
+// NewPacketWriteFn creates a new UDPPacketWriteFn.
 func NewPacketWriteFn(payloadLen, scalarsPerFrame uint, seqHeader bool, order binary.ByteOrder) (PacketWriteFn, error) {
 	const (
 		sizeofScalar = 2

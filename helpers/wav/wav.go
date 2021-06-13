@@ -13,14 +13,14 @@ import (
 
 // RiffChunk represents the first chunk of a WAV file.
 type RiffChunk struct {
-	ChunkId   [4]byte
+	ChunkID   [4]byte
 	ChunkSize uint32
 	Format    [4]byte
 }
 
 // FmtChunk represents a fmt chunk in a header file.
 type FmtChunk struct {
-	ChunkId       [4]byte
+	ChunkID       [4]byte
 	ChunkSize     uint32
 	AudioFormat   uint16
 	NumChannels   uint16
@@ -36,7 +36,7 @@ type FmtChunk struct {
 // IEEE floating point sample data, we just include it in every
 // header.
 type FactChunk struct {
-	ChunkId      [4]byte
+	ChunkID      [4]byte
 	ChunkSize    uint32
 	SampleLength uint32
 }
@@ -48,7 +48,7 @@ type FactChunk struct {
 // via encoding/binary to create a binary block of data that can
 // be inserted before sample data.
 type DataChunk struct {
-	ChunkId   [4]byte
+	ChunkID   [4]byte
 	ChunkSize uint32
 	// samples follow this chunk
 }
@@ -70,7 +70,10 @@ type Header struct {
 type SampleFormat uint16
 
 const (
-	LPCM              SampleFormat = 1
+	// LPCM is used to specify a linear PCM sample format.
+	LPCM SampleFormat = 1
+	// IEEEFloatingPoint is used to specify a 32-bit or 64-bit
+	// IEEE floating-point sample format.
 	IEEEFloatingPoint SampleFormat = 3
 )
 
@@ -119,15 +122,15 @@ func NewHeader(
 	// RIFF header
 	switch isBig {
 	case true:
-		head.Riff.ChunkId = [4]byte{'R', 'I', 'F', 'X'}
+		head.Riff.ChunkID = [4]byte{'R', 'I', 'F', 'X'}
 	default:
-		head.Riff.ChunkId = [4]byte{'R', 'I', 'F', 'F'}
+		head.Riff.ChunkID = [4]byte{'R', 'I', 'F', 'F'}
 	}
 	head.Riff.ChunkSize = 4 + dataBytes
 	head.Riff.Format = [4]byte{'W', 'A', 'V', 'E'}
 
 	// fmt header
-	head.Fmt.ChunkId = [4]byte{'f', 'm', 't', ' '}
+	head.Fmt.ChunkID = [4]byte{'f', 'm', 't', ' '}
 	head.Fmt.ChunkSize = 18
 	switch format {
 	case IEEEFloatingPoint:
@@ -157,12 +160,12 @@ func NewHeader(
 	head.Fmt.ExtSize = 0 // required for floating-point
 
 	// fact header
-	head.Fact.ChunkId = [4]byte{'f', 'a', 'c', 't'}
+	head.Fact.ChunkID = [4]byte{'f', 'a', 'c', 't'}
 	head.Fact.ChunkSize = 4
 	head.Fact.SampleLength = numFrames
 
 	// data header
-	head.Data.ChunkId = [4]byte{'d', 'a', 't', 'a'}
+	head.Data.ChunkID = [4]byte{'d', 'a', 't', 'a'}
 	head.Data.ChunkSize = dataBytes
 
 	return &head, nil

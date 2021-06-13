@@ -5,7 +5,6 @@
 package parse
 
 import (
-	"flag"
 	"fmt"
 	"regexp"
 	"strconv"
@@ -15,10 +14,8 @@ import (
 	"github.com/msiner/sdrplay-go/api"
 )
 
-type FlagSet interface {
-	Var(value flag.Value, name string, usage string)
-}
-
+// LNAFlagHelp contains a flag help message for a flag that accepts an
+// LNA configuration and has a value that is parsed by LNAFlag.
 const LNAFlagHelp = `0-27|0%-100%: LNA State or Percent
 Sets the LNA level. Without a % suffix, is an LNA state where 0 provides
 the least RF gain reduction. The maximum number of valid states depends
@@ -27,7 +24,8 @@ as a percent of the maximum where 0% is the minimum amount of gain and
 100% is the maximum amount of gain. Specifying as a percent allows
 automatic determination of LNA state based on the dependent variables.`
 
-func CheckLNAFlag(arg string) (*uint8, *float64, error) {
+// LNAFlag parses and validates an LNA configuration flag.
+func LNAFlag(arg string) (*uint8, *float64, error) {
 	if arg == "" {
 		return nil, nil, nil
 	}
@@ -57,23 +55,15 @@ func CheckLNAFlag(arg string) (*uint8, *float64, error) {
 	}
 }
 
-const LNAPercentFlagHelp = `0-100: LNA Gain Percent
-Sets the LNA gain as a percent of the maximum where 0 is the minimum amount
-of gain and 100 is the maximum amount of gain.`
-
-func CheckLNAPercentFlag(val uint) (float64, error) {
-	if val > 100 {
-		return 0, fmt.Errorf("invalid LNA percent; got %d, want 0-100", val)
-	}
-	return float64(val) / 100, nil
-}
-
+// DecFlagHelp contains a flag help message for a flag that accepts a
+// decimation factor and has a value that is checked by DecFlag.
 const DecFlagHelp = `1|2|4|8|16|32: Decimation factor
 Sets the decimation factor. This will reduce the effective sample rate.
 The analog bandwidth will be adjusted automatically to use the best fit
 as the effective sample rate decreases.`
 
-func CheckDecFlag(val uint) (uint8, error) {
+// DecFlag validates and converts a decimation factor.
+func DecFlag(val uint) (uint8, error) {
 	switch val {
 	case 1, 2, 4, 8, 16, 32:
 		return uint8(val), nil
@@ -82,15 +72,21 @@ func CheckDecFlag(val uint) (uint8, error) {
 	}
 }
 
+// FsFlagHelp contains a flag help message for a flag that accepts a
+// sample rate and has a value that is parsed by FsFlag.
 const FsFlagHelp = `FsHz: Sample Rate
 Sample rate between 2 MHz and 10 MHz specified in Hz. Can be specified
 with k, K, m, M, g, or G suffix to indicate the value is in kHz, MHz,
 or GHz respectively (e.g. 2.1M is equal to 2100000)`
 
-func ParseFsFlag(arg string) (float64, error) {
-	return ParseSampleRate(arg)
+// FsFlag parses and validates a sample rate and returns it in Hz.
+func FsFlag(arg string) (float64, error) {
+	return SampleRate(arg)
 }
 
+// WarmFlagHelp contains a flag help message for a flag that accepts a
+// warm-up duration and has a value that is parsed and validated by
+// WarmFlag.
 const WarmFlagHelp = `seconds: Warmup Time
 Run the radio for the specified number of seconds to warm up and
 stabilize performance before capture. It also avoids sample drops
@@ -98,21 +94,26 @@ typically encountered when the stream is first starting. During
 the warmup period, samples are discarded. The maximum value allowed
 is 60 seconds.`
 
-func ParseWarmFlag(val uint) (time.Duration, error) {
-	const MAX_WARM = 60 * time.Second
+// WarmFlag parses and validates a warm-up duration.
+func WarmFlag(val uint) (time.Duration, error) {
+	const MaxWarm = 60 * time.Second
 
 	warm := time.Duration(val) * time.Second
-	if warm > MAX_WARM {
-		return 0, fmt.Errorf("invalid warmup duration; got %v, want <= %v", warm, MAX_WARM)
+	if warm > MaxWarm {
+		return 0, fmt.Errorf("invalid warmup duration; got %v, want <= %v", warm, MaxWarm)
 	}
 
 	return warm, nil
 }
 
+// AGCCtlFlagHelp contains a flag help message for a flag that accepts an
+// AGC control configuration and has a value that is parsed and validated by
+// AGCCtlFlag.
 const AGCCtlFlagHelp = `disable|enable|5|50|100: AGC Control
 Disable or enable AGC with the specified loop bandwidth.`
 
-func ParseAGCCtlFlag(arg string) (api.AgcControlT, error) {
+// AGCCtlFlag parses and validates an AGC control configuration.
+func AGCCtlFlag(arg string) (api.AgcControlT, error) {
 	switch arg {
 	case "disable":
 		return api.AGC_DISABLE, nil
@@ -129,30 +130,47 @@ func ParseAGCCtlFlag(arg string) (api.AgcControlT, error) {
 	}
 }
 
+// AGCSetFlagHelp contains a flag help message for a flag that accepts an
+// AGC set point and has a value that is parsed and validated by
+// AGCSetFlag.
 const AGCSetFlagHelp = `dBFS: AGC Set Point
 AGC set point in dBFS.`
 
-func ParseAGCSetFlag(val int) (int32, error) {
+// AGCSetFlag parses and validates an AGC set point.
+func AGCSetFlag(val int) (int32, error) {
 	if val > 0 {
 		return 0, fmt.Errorf("invalid AGC set point; got %d dBFS, want <= 0", val)
 	}
 	return int32(val), nil
 }
 
-type DuoTunerFlag string
-
-const (
-	DuoTunerFlagEither DuoTunerFlag = "either"
-	DuoTunerFlagA      DuoTunerFlag = "a"
-	DuoTunerFlagB      DuoTunerFlag = "b"
-	DuoTunerFlagHelp                = `a|1|b|2|either: RSPDuo Tuner Selection
+// DuoTunerFlagHelp contains a flag help message for a flag that accepts an
+// RSPduo tuner specifier and has a value that is parsed and validated by
+// DuoTunerFlag.
+const DuoTunerFlagHelp = `a|1|b|2|either: RSPDuo Tuner Selection
 Select which RSPDuo tuner to use if the selected device is an RSPduo. If
 "either" is specified, tuner A will be used if available. Otherwise, tuner
 B will be used if available. If the selected device is not an RSPduo, this
 option will have no effect.`
+
+// DuoTunerSelect is an enum type returned from DuoTunerFlag to convey
+// the parsed tuner selection. This type has been created because there
+// is not a single type or value from the C API that conveys the meaning
+// needed by DuoTunerFlag.
+type DuoTunerSelect string
+
+const (
+	// DuoTunerFlagEither specifies that either tuner can be selected.
+	DuoTunerFlagEither DuoTunerSelect = "either"
+	// DuoTunerFlagA specifies that only tuner A or 1 should be selected.
+	DuoTunerFlagA DuoTunerSelect = "a"
+	// DuoTunerFlagB specifies that only tuner B or 2 should be selected.
+	DuoTunerFlagB DuoTunerSelect = "b"
 )
 
-func ParseDuoTunerFlag(arg string) (DuoTunerFlag, error) {
+// DuoTunerFlag parses and validates an RSPduo tuner selection. Valid
+// values are "either", "a", "1", "b", or "2".
+func DuoTunerFlag(arg string) (DuoTunerSelect, error) {
 	switch arg {
 	case "either":
 		return DuoTunerFlagEither, nil
@@ -165,13 +183,18 @@ func ParseDuoTunerFlag(arg string) (DuoTunerFlag, error) {
 	}
 }
 
+// SerialsFlagHelp contains a flag help message for a flag that accepts a
+// comma-separated list of device serial numbers and has a value that is
+// parsed and validated by SerialsFlag.
 const SerialsFlagHelp = `serialA,serialB,...: Device Serial Numbers
 Provide a comma-separated list of one or more device serial numbers
 to select from. If a device with one of the provided serial numbers
 is not found, no device will be selected. The value "any" matches
 any serial number.`
 
-func ParseSerialsFlag(arg string) ([]api.SerialNumber, error) {
+// SerialsFlag parses and validates a comma-separated list of device
+// serial numbers.
+func SerialsFlag(arg string) ([]api.SerialNumber, error) {
 	var serials []api.SerialNumber
 	if arg == "any" {
 		return serials, nil
@@ -192,10 +215,14 @@ func ParseSerialsFlag(arg string) ([]api.SerialNumber, error) {
 	return serials, nil
 }
 
+// USBFlagHelp contains a flag help message for a flag that accepts a
+// USB transfer mode and has a value that is parsed and validated by
+// USBFlag.
 const USBFlagHelp = `isoch|bulk: USB Transfer Mode
 Select to configure the device in either isochronous or bulk mode.`
 
-func ParseUSBFlag(arg string) (api.TransferModeT, error) {
+// USBFlag parses and validates a USB transfer mode specification.
+func USBFlag(arg string) (api.TransferModeT, error) {
 	switch strings.ToLower(arg) {
 	case "isoch":
 		return api.ISOCH, nil
@@ -206,13 +233,20 @@ func ParseUSBFlag(arg string) (api.TransferModeT, error) {
 	}
 }
 
+// HiZFlagHelp contains a flag help message for a boolean flag that
+// requests use of a High-Z port when true.
 const HiZFlagHelp = `Enable High-Z Port
 If using an RSP2 or RSPduo, enable the High-Z port.`
 
+// DxAntFlagHelp contains a flag help message for a flag that accepts an
+// RSPdx antenna selection and has a value that is parsed and validated by
+// DxAntFlag.
 const DxAntFlagHelp = `a|b|c: RSPdx Antenna
 Select RSPdx antenna input.`
 
-func ParseDxAntFlag(arg string) (api.RspDx_AntennaSelectT, error) {
+// DxAntFlag parses and validates an RSPdx antenna selection. Valid
+// values are "a", "b", or "c".
+func DxAntFlag(arg string) (api.RspDx_AntennaSelectT, error) {
 	switch strings.ToLower(arg) {
 	case "a":
 		return api.RspDx_ANTENNA_A, nil
@@ -225,10 +259,15 @@ func ParseDxAntFlag(arg string) (api.RspDx_AntennaSelectT, error) {
 	}
 }
 
+// Rsp2AntFlagHelp contains a flag help message for a flag that accepts an
+// RSP2 antenna selection and has a value that is parsed and validated by
+// Rsp2AntFlag.
 const Rsp2AntFlagHelp = `a|b: RSP2 Antenna
 Select RSP2 antenna input.`
 
-func ParseRsp2AntFlag(arg string) (api.Rsp2_AntennaSelectT, error) {
+// Rsp2AntFlag parses and validates an RSP2 antenna selection. Valid
+// values are "a" or "b".
+func Rsp2AntFlag(arg string) (api.Rsp2_AntennaSelectT, error) {
 	switch strings.ToLower(arg) {
 	case "a":
 		return api.Rsp2_ANTENNA_A, nil

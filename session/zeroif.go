@@ -45,6 +45,9 @@ func GetBestZeroIFBW(fs float64, dec uint8) (api.Bw_MHzT, error) {
 	}
 }
 
+// SetZeroIF configures the selected device to operate in zero-IF mode.
+// It uses GetBestZeroIFBW with the given arguments to determine the
+// optimal analog bandwidth.
 func SetZeroIF(d *api.DeviceT, p *api.DeviceParamsT, c *api.RxChannelParamsT, fs float64, dec uint8) error {
 	bw, err := GetBestZeroIFBW(fs, dec)
 	if err != nil {

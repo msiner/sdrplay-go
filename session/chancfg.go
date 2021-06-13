@@ -144,7 +144,7 @@ func SetTuneFreq(d *api.DeviceT, p *api.DeviceParamsT, c *api.RxChannelParamsT, 
 	return nil
 }
 
-// WithTune creates a function that configures the center RF tuning frequency.
+// WithTuneFreq creates a function that configures the center RF tuning frequency.
 func WithTuneFreq(freq float64) ChanConfigFn {
 	return func(d *api.DeviceT, p *api.DeviceParamsT, c *api.RxChannelParamsT) error {
 		return SetTuneFreq(d, p, c, freq)

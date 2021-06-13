@@ -94,11 +94,11 @@ the sample rate.`,
 		return errors.New("too many arguments")
 	}
 
-	freq, err := parse.ParseTuneFrequency(flags.Arg(0))
+	freq, err := parse.TuneFrequency(flags.Arg(0))
 	if err != nil {
 		return err
 	}
-	numBytes, err := parse.ParseSize(flags.Arg(1))
+	numBytes, err := parse.SizeInBytes(flags.Arg(1))
 	if err != nil {
 		return err
 	}
@@ -107,57 +107,57 @@ the sample rate.`,
 		return fmt.Errorf("invalid file size; got %d bytes, but WAV has a maximum of 4 GiB", numBytes)
 	}
 
-	fs, err := parse.ParseFsFlag(*fsOpt)
+	fs, err := parse.FsFlag(*fsOpt)
 	if err != nil {
 		return err
 	}
 
-	dec, err := parse.CheckDecFlag(*decOpt)
+	dec, err := parse.DecFlag(*decOpt)
 	if err != nil {
 		return err
 	}
 
-	warm, err := parse.ParseWarmFlag(*warmOpt)
+	warm, err := parse.WarmFlag(*warmOpt)
 	if err != nil {
 		return err
 	}
 
-	agcCtl, err := parse.ParseAGCCtlFlag(*agcCtlOpt)
+	agcCtl, err := parse.AGCCtlFlag(*agcCtlOpt)
 	if err != nil {
 		return err
 	}
 
-	agcSet, err := parse.ParseAGCSetFlag(*agcSetOpt)
+	agcSet, err := parse.AGCSetFlag(*agcSetOpt)
 	if err != nil {
 		return err
 	}
 
-	usb, err := parse.ParseUSBFlag(*usbOpt)
+	usb, err := parse.USBFlag(*usbOpt)
 	if err != nil {
 		return err
 	}
 
-	serials, err := parse.ParseSerialsFlag(*serialsOpt)
+	serials, err := parse.SerialsFlag(*serialsOpt)
 	if err != nil {
 		return err
 	}
 
-	duoTuner, err := parse.ParseDuoTunerFlag(*duoTunerOpt)
+	duoTuner, err := parse.DuoTunerFlag(*duoTunerOpt)
 	if err != nil {
 		return err
 	}
 
-	dxAnt, err := parse.ParseDxAntFlag(*dxAntOpt)
+	dxAnt, err := parse.DxAntFlag(*dxAntOpt)
 	if err != nil {
 		return err
 	}
 
-	rsp2Ant, err := parse.ParseRsp2AntFlag(*rsp2AntOpt)
+	rsp2Ant, err := parse.Rsp2AntFlag(*rsp2AntOpt)
 	if err != nil {
 		return err
 	}
 
-	lnaState, lnaPct, err := parse.CheckLNAFlag(*lnaOpt)
+	lnaState, lnaPct, err := parse.LNAFlag(*lnaOpt)
 	lnaCfg := session.NoopChanConfig
 	switch {
 	case err != nil:
@@ -181,7 +181,7 @@ the sample rate.`,
 	var serialsFilter session.DevFilterFn
 	switch serials {
 	case nil:
-		serialsFilter = session.WithNoopDevFilter()
+		serialsFilter = session.NoopDevFilter
 	default:
 		serialsFilter = session.WithSerials(serials...)
 	}

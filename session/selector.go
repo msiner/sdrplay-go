@@ -22,13 +22,11 @@ type DevSelectFn func(devs []*api.DeviceT) *api.DeviceT
 // first remaining device.
 type DevFilterFn func(devs []*api.DeviceT) []*api.DeviceT
 
-// WithAnyDevice creates a filter function that accepts
+// NoopDevFilter is a filter function that accepts
 // any device. It can be used as a noop or placeholder for
 // another function.
-func WithNoopDevFilter() DevFilterFn {
-	return func(devs []*api.DeviceT) []*api.DeviceT {
-		return devs
-	}
+func NoopDevFilter(devs []*api.DeviceT) []*api.DeviceT {
+	return devs
 }
 
 // WithSerials creates a device filter function that keeps only

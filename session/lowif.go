@@ -10,6 +10,8 @@ import (
 	"github.com/msiner/sdrplay-go/api"
 )
 
+// LowIFSampleRate is the pre-decimation sample-rate when operating in
+// Low IF mode.
 const LowIFSampleRate = 2e6
 
 // LowIFStrategy is a type used to communicate the priorities of the user
@@ -123,6 +125,9 @@ func GetBestLowIFSettings(d *api.DeviceT, strat LowIFStrategy, dec uint8) (float
 	return fsRes, bwRes, ifRes, nil
 }
 
+// SetLowIF configures the provided device to operate in low-IF mode.
+// It uses GetBestLowIFSettings with the given arguments to determine
+// the optimal settings.
 func SetLowIF(d *api.DeviceT, p *api.DeviceParamsT, c *api.RxChannelParamsT, strat LowIFStrategy, dec uint8) error {
 	fsBest, bwBest, ifBest, err := GetBestLowIFSettings(d, strat, dec)
 	if err != nil {
@@ -151,7 +156,7 @@ func SetLowIF(d *api.DeviceT, p *api.DeviceParamsT, c *api.RxChannelParamsT, str
 }
 
 // WithLowIF creates a function to configure the selected device to
-// operate in low-IF mode. It will use GetBestLowIFSettings with the
+// operate in low-IF mode. It uses GetBestLowIFSettings with the
 // given arguments to determine the optimal settings.
 func WithLowIF(strat LowIFStrategy, dec uint8) ChanConfigFn {
 	return func(d *api.DeviceT, p *api.DeviceParamsT, c *api.RxChannelParamsT) error {

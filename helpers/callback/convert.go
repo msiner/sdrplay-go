@@ -43,7 +43,7 @@ func NewConvertToFloat32Fn(numBits uint) ConvertToFloat32Fn {
 	}
 }
 
-// ConvertToFloat64Fn is a function type that returns a slice with the
+// ConvertToComplex64Fn is a function type that returns a slice with the
 // provided indepedent signal component sample scalars converted to complex64.
 // The xi slice contains the real component and the xq slice contains the
 // imaginary component. The lengths of xi and xq should be equal. The length
