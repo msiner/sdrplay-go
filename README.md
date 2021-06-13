@@ -40,14 +40,14 @@ a Go module.
 ```sh
 mkdir sdrapp
 cd sdrapp
-go mod init local/sdrapp
+go mod init my.local/sdrapp
 ```
 
-2. Create and open new file at ```./main.go```
+2. Create and open a new file called `main.go`.
 
 3. Add the following Go code to the file. This main function will
-select and configure a single RSP device, receive a single callback
-of samples, and then exit. 
+select and configure a single RSP device, receive a single stream
+callback, print the number of samples received, and then exit. 
 ```go
 package main
 
