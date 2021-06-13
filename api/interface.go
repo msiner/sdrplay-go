@@ -5,11 +5,10 @@
 package api
 
 // API is an interface wrapper around the entire sdrplay_api. There are two
-// reasons for defining this interface.
-// 1. With 2 separate implementations (cgo and dll), this interface is used
-//    to verify the implementations match.
-// 2. Allows code that uses the API to be tested indepent of an
-//    implementation or using a mock of the API.
+// reasons for defining this interface. First, with 2 separate implementations
+// (cgo and dll), this interface is used to verify the implementations match.
+// Second, it allows code that uses the API to be tested indepent of an
+// implementation or using a mock of the API.
 type API interface {
 	// Open is a wrapper around sdrplay_api_Open(). Begins API access.
 	// Returns an error if called more than once before Close() is called.

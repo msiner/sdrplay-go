@@ -31,8 +31,10 @@ func rspudp() error {
 		fmt.Fprintln(flags.Output(), strings.TrimSpace(`
 Usage: rspudp [FLAGS] <tuneHz>
 
-rspwav connects to an available RSP device, configures it, and sends
-the received samples to the specified UDP target.
+rspudp connects to an available RSP device, configures it, and
+sends the received samples to the specified UDP target. The samples
+are interleaved and framed in the payload as:
+[I1,Q1,I2,Q2,...,IN,QN]
 
 Arguments:
   tuneHz

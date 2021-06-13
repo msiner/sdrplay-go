@@ -6,5 +6,8 @@
 *.out
 *.BAK
 /rspwav
+/rspudp
 /rspdetect
 /duowav
+/duoudp
+/duocorr

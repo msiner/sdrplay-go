@@ -36,6 +36,7 @@ type Impl struct{}
 // Verify that Impl implements API.
 var _ API = Impl{}
 
+// GetAPI returns an implementation of the API interface.
 func GetAPI() Impl {
 	return Impl{}
 }

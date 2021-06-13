@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 
 /*
-Package helpers contains sub-packages with useful tools for
-handling callbacks and processing sample data.
+Package cmd contains various command-line applications that implement useful
+functionality and provide examples of how to use the sdrplay-go module.
 */
-package helpers
+package cmd

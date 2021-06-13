@@ -67,6 +67,7 @@ var (
 	eventCallbackWin   = windows.NewCallback(eventCallback)
 )
 
+// GetAPI returns an implementation of the API interface.
 func GetAPI() Impl {
 	return Impl{}
 }

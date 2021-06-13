@@ -71,7 +71,12 @@ type StreamCbParamsT struct {
 
 // Callback function prototypes. Unlike the C versions,
 // there is no cbContext argument. In Go, this is unneccessary because
-// callbacks can be closures or methods that have bound state.
+// callbacks can be closures or functions bound to types with state.
+// Regardless of the actual implementation, callback implementations
+// should assume any slice and pointer types in the callback arguments
+// are owned by the C API. Data should be explicitly copied if it
+// needs to be stored or otherwise escape the scope of the callback
+// function.
 type (
 	StreamCallbackT func(xi, xq []int16, params *StreamCbParamsT, reset bool)
 	EventCallbackT  func(eventId EventT, tuner TunerSelectT, params *EventParamsT)
