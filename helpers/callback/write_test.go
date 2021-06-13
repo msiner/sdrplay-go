@@ -33,7 +33,9 @@ func TestWrite(t *testing.T) {
 				samples[j] = int16(rand.Int())
 			}
 			buf := bytes.NewBuffer(nil)
-			binary.Write(buf, order, samples)
+			if err := binary.Write(buf, order, samples); err != nil {
+				t.Fatal(err)
+			}
 			want := buf.Bytes()
 			buf.Reset()
 
@@ -64,7 +66,9 @@ func TestFloat32Write(t *testing.T) {
 				samples[j] = rand.Float32()
 			}
 			buf := bytes.NewBuffer(nil)
-			binary.Write(buf, order, samples)
+			if err := binary.Write(buf, order, samples); err != nil {
+				t.Fatal(err)
+			}
 			want := buf.Bytes()
 			buf.Reset()
 
@@ -95,7 +99,9 @@ func TestComplex64Write(t *testing.T) {
 				samples[j] = complex(rand.Float32(), rand.Float32())
 			}
 			buf := bytes.NewBuffer(nil)
-			binary.Write(buf, order, samples)
+			if err := binary.Write(buf, order, samples); err != nil {
+				t.Fatal(err)
+			}
 			want := buf.Bytes()
 			buf.Reset()
 
@@ -119,6 +125,6 @@ func BenchmarkWrite(b *testing.B) {
 	write := NewWriteFn(binary.LittleEndian)
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
-		write(ioutil.Discard, x)
+		_, _ = write(ioutil.Discard, x)
 	}
 }

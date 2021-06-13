@@ -82,7 +82,8 @@ analog bandwidths of 1.536 MHz, 600 kHz, 300 kHz, and 200 kHz.
 	floatOpt := flags.Bool("float", false, "Write samples in floating-point format")
 	bigOpt := flags.Bool("big", false, "Write samples with big-endian byte order")
 
-	flags.Parse(os.Args[1:])
+	// Using ExitOnError
+	_ = flags.Parse(os.Args[1:])
 
 	switch flags.NArg() {
 	case 0:
@@ -354,7 +355,11 @@ analog bandwidths of 1.536 MHz, 600 kHz, 300 kHz, and 200 kHz.
 					return nil
 				case evt := <-evtChan.C:
 					event.LogEventMsg(evt, lg)
-					event.HandlePowerOverloadChangeMsg(d, a, evt, lg, true)
+					err := event.HandlePowerOverloadChangeMsg(d, a, evt, lg, true)
+					if err != nil {
+						lg.Printf("failed to handle power overload event; %v", err)
+						cancel()
+					}
 				}
 			}
 		}),

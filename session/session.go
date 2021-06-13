@@ -8,6 +8,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"os"
 
 	"github.com/msiner/sdrplay-go/api"
 )
@@ -205,7 +206,11 @@ func (s *Session) Run(ctx context.Context) error {
 		if err := impl.LockDeviceApi(); err != nil {
 			return nil, fmt.Errorf("failed to lock API: %v", impl.GetLastError(nil))
 		}
-		defer impl.UnlockDeviceApi()
+		defer func() {
+			if err := impl.UnlockDeviceApi(); err != nil {
+				fmt.Fprintf(os.Stderr, "UnlockDeviceApi failed; %v", err)
+			}
+		}()
 
 		devs, err := impl.GetDevices()
 		if err != nil {
@@ -244,7 +249,11 @@ func (s *Session) Run(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
-	defer impl.ReleaseDevice(dev)
+	defer func() {
+		if err := impl.ReleaseDevice(dev); err != nil {
+			fmt.Fprintf(os.Stderr, "ReleaseDevice failed; %v", err)
+		}
+	}()
 
 	if s.DebugEn {
 		if err := impl.DebugEnable(dev.Dev, api.DbgLvl_Message); err != nil {
@@ -275,7 +284,11 @@ func (s *Session) Run(ctx context.Context) error {
 	if err := impl.Init(dev.Dev, cbFuncs); err != nil {
 		return fmt.Errorf("init failed: %v", impl.GetLastError(dev))
 	}
-	defer impl.Uninit(dev.Dev)
+	defer func() {
+		if err := impl.Uninit(dev.Dev); err != nil {
+			fmt.Fprintf(os.Stderr, "Uninit failed; %v", err)
+		}
+	}()
 
 	switch s.Control {
 	case nil:

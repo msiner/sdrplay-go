@@ -77,7 +77,8 @@ the sample rate.`,
 	floatOpt := flags.Bool("float", false, "Write samples in floating-point format")
 	bigOpt := flags.Bool("big", false, "Write samples with big-endian byte order")
 
-	flags.Parse(os.Args[1:])
+	// Using ExitOnError
+	_ = flags.Parse(os.Args[1:])
 
 	switch flags.NArg() {
 	case 0:

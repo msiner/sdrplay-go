@@ -30,7 +30,9 @@ Flags:
 		))
 		flags.PrintDefaults()
 	}
-	flags.Parse(os.Args[1:])
+
+	// Using ExitOnError
+	_ = flags.Parse(os.Args[1:])
 
 	if flags.NArg() != 0 {
 		fmt.Fprintln(os.Stderr, "too many arguments provided")

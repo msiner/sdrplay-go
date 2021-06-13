@@ -78,7 +78,8 @@ This will use 8 bytes of the specified payload size.`,
 	rsp2AntOpt := flags.String("rsp2ant", "a", parse.Rsp2AntFlagHelp)
 	bigOpt := flags.Bool("big", false, "Write samples with big-endian byte order")
 
-	flags.Parse(os.Args[1:])
+	// Using ExitOnError
+	_ = flags.Parse(os.Args[1:])
 
 	switch flags.NArg() {
 	case 0:

@@ -108,6 +108,6 @@ func BenchmarkFastWrite(b *testing.B) {
 	x := make([]int16, 2048)
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
-		FastWrite(ioutil.Discard, x)
+		_, _ = FastWrite(ioutil.Discard, x)
 	}
 }
