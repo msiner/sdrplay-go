@@ -1,5 +1,7 @@
 # sdrplay-go
 
+[![Go Reference](https://pkg.go.dev/badge/github.com/msiner/sdrplay-go.svg)](https://pkg.go.dev/github.com/msiner/sdrplay-go)
+
 sdrplay-go is a Go programming language wrapper of the SDRplay service based API
 (version 3.0 and greater) that can be used to access SDRplay RSP receivers. It
 implements direct access to the C API as well as a higher-level declarative API
