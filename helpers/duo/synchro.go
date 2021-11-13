@@ -50,14 +50,18 @@ type SynchroEventCbFn func(evt SynchroEvent, msg string)
 // from all four channels.
 //
 // Synchronization Assumptions:
+//
 // 1. Streams A and B have the same effective sample rate.
+//
 // 2. Stream A and B callbacks must be called in a consistently
-//    alternating serial order.
+// alternating serial order.
+//
 // 3. Stream A and B callbacks receive the same number of
-//    samples in successive callbacks.
+// samples in successive callbacks.
+//
 // 4. Samples provided to a stream B callback match the same
-//    time span as the samples provided to the last stream A
-//    callback.
+// time span as the samples provided to the last stream A
+// callback.
 type Synchro struct {
 	cbScalars   int
 	cb          SynchroCbFn

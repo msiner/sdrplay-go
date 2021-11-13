@@ -33,7 +33,7 @@ func NoopDevFilter(devs []*api.DeviceT) []*api.DeviceT {
 // devices with matching one of the serial numbers provided.
 //
 // Examples:
-// Select an exact serial number:
+// 		// Select an exact serial number:
 // 		WithSerials(api.ParseSerialNumber("1905015632"))
 func WithSerials(vals ...api.SerialNumber) DevFilterFn {
 	return func(devs []*api.DeviceT) []*api.DeviceT {
@@ -54,9 +54,10 @@ func WithSerials(vals ...api.SerialNumber) DevFilterFn {
 // IDs provided.
 //
 // Examples:
-// Get only RSPdx and RSP1A hardware:
+// 		// Get only RSPdx and RSP1A hardware:
 // 		WithModels(api.RSPdx_ID, api.RS1A_ID)
-// Get only RSPduo hardware:
+//
+// 		// Get only RSPduo hardware:
 // 		WithModels(api.RSPduo_ID)
 func WithModels(vals ...api.HWVersion) DevFilterFn {
 	return func(devs []*api.DeviceT) []*api.DeviceT {
