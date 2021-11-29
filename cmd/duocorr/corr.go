@@ -11,11 +11,17 @@ import (
 	"github.com/msiner/sdrplay-go/helpers/duo"
 )
 
+const (
+	corrMaxOffset = 20
+	corrWidth     = corrMaxOffset*2 + 1
+)
+
 // Correlation holds the results of a single correlation pass.
 type Correlation struct {
 	Peak    int
 	PeakRaw float64
 	ZScore  float64
+	Stats   FloatStats
 	Raw     []float64
 }
 
@@ -29,11 +35,9 @@ type CorrelationFn func(msg *duo.SynchroMsg) Correlation
 // third-party DSP library. This is a naive brute-force
 // cross-correlation implementation.
 func NewCorrelationFn(cbSamples int) CorrelationFn {
-	const offset = 20
-	const width = offset*2 + 1
 	amag := make([]float64, cbSamples)
 	bmag := make([]float64, cbSamples)
-	corr := make([]float64, width)
+	corr := make([]float64, corrWidth)
 	aToCx := callback.NewConvertToComplex64Fn(16)
 	bToCx := callback.NewConvertToComplex64Fn(16)
 	acc := FloatAccumulator{}
@@ -56,11 +60,11 @@ func NewCorrelationFn(cbSamples int) CorrelationFn {
 			bmag[i] = math.Hypot(float64(real(b)), float64(imag(b)))
 		}
 
-		currOffset := -offset
-		awin := amag[offset : len(amag)-offset]
+		currOffset := -corrMaxOffset
+		awin := amag[corrMaxOffset : len(amag)-corrMaxOffset]
 		for i := range corr {
 			corr[i] = 0
-			bwin := bmag[offset+currOffset : offset+currOffset+len(awin)]
+			bwin := bmag[corrMaxOffset+currOffset : corrMaxOffset+currOffset+len(awin)]
 			for j, a := range awin {
 				corr[i] += a * bwin[j]
 			}
@@ -84,13 +88,14 @@ func NewCorrelationFn(cbSamples int) CorrelationFn {
 		mean := sum / float64(len(corr))
 		stats := acc.Analyze()
 
-		pos := maxi - (width / 2)
+		pos := maxi - (corrWidth / 2)
 
 		res := Correlation{
 			Peak:    pos,
 			PeakRaw: max,
 			ZScore:  (max - mean) / stats.StdDev,
-			Raw:     make([]float64, width),
+			Stats:   stats,
+			Raw:     make([]float64, corrWidth),
 		}
 		copy(res.Raw, corr)
 		return res
