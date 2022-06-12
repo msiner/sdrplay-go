@@ -24,7 +24,12 @@ as a percent of the maximum where 0% is the minimum amount of gain and
 100% is the maximum amount of gain. Specifying as a percent allows
 automatic determination of LNA state based on the dependent variables.`
 
-// LNAFlag parses and validates an LNA configuration flag.
+// LNAFlag parses and validates an LNA configuration flag. Up to one
+// of the return values is non-nil. If arg is the empty string, all
+// return values are nil. If arg has a '%' suffix, the float64 pointer
+// points to a percentage value from 0 to 1. If arg specifies a number,
+// the uint8 pointer points to an LNA level value. On any invalid input,
+// the error is non-nil.
 func LNAFlag(arg string) (*uint8, *float64, error) {
 	if arg == "" {
 		return nil, nil, nil
@@ -201,7 +206,7 @@ func SerialsFlag(arg string) ([]api.SerialNumber, error) {
 	}
 	// There is no defined spec for serial number format, but it seems
 	// like are only alpha-numeric characters. No spaces or special chars.
-	rx := regexp.MustCompile(`^[[:alnum:]]+?`)
+	rx := regexp.MustCompile(`^[[:alnum:]]{1,64}$`)
 	parts := strings.Split(arg, ",")
 	if len(parts) == 0 {
 		return nil, fmt.Errorf("no serials specified; got %s", arg)

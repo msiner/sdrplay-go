@@ -7,6 +7,6 @@ Package session implements a high-level API on top of and as an
 alternative to the low-level the api package that is mostly a one-to-one
 mapping of the C API. The API provided in this package is designed
 using a functional options pattern to wrap common configuration tasks
-in composable functions for a highly declarative API.
+in composable functions for a more declarative API.
 */
 package session
