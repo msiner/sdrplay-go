@@ -6,7 +6,6 @@ package parse
 
 import (
 	"fmt"
-	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -39,21 +38,21 @@ func LNAFlag(arg string) (*uint8, *float64, error) {
 		arg = strings.TrimSuffix(arg, "%")
 		val, err := strconv.ParseFloat(arg, 64)
 		if err != nil {
-			return nil, nil, fmt.Errorf("invalid LNA percent; %v", err)
+			return nil, nil, fmt.Errorf("invalid LNA percent: %v", err)
 		}
 		if val > 100 {
-			return nil, nil, fmt.Errorf("invalid LNA percent; got %f, want 0-100", val)
+			return nil, nil, fmt.Errorf("invalid LNA percent: got %f, want 0-100", val)
 		}
 		val = val / 100
 		return nil, &val, nil
 	default:
 		val, err := strconv.ParseUint(arg, 10, 8)
 		if err != nil {
-			return nil, nil, fmt.Errorf("invalid LNA state; %v", err)
+			return nil, nil, fmt.Errorf("invalid LNA state: %v", err)
 		}
 		const maxLNAState = 27
 		if val > maxLNAState {
-			return nil, nil, fmt.Errorf("invalid LNA state; got %d, want 0-%d", val, maxLNAState)
+			return nil, nil, fmt.Errorf("invalid LNA state: got %d, want 0-%d", val, maxLNAState)
 		}
 		res := uint8(val)
 		return &res, nil, nil
@@ -73,7 +72,7 @@ func DecFlag(val uint) (uint8, error) {
 	case 1, 2, 4, 8, 16, 32:
 		return uint8(val), nil
 	default:
-		return 0, fmt.Errorf("invalid decimation factor; got %d, want 1|2|4|8|16|32", val)
+		return 0, fmt.Errorf("invalid decimation factor: got %d, want 1|2|4|8|16|32", val)
 	}
 }
 
@@ -105,7 +104,7 @@ func WarmFlag(val uint) (time.Duration, error) {
 
 	warm := time.Duration(val) * time.Second
 	if warm > MaxWarm {
-		return 0, fmt.Errorf("invalid warmup duration; got %v, want <= %v", warm, MaxWarm)
+		return 0, fmt.Errorf("invalid warmup duration: got %v, want <= %v", warm, MaxWarm)
 	}
 
 	return warm, nil
@@ -119,7 +118,7 @@ Disable or enable AGC with the specified loop bandwidth.`
 
 // AGCCtlFlag parses and validates an AGC control configuration.
 func AGCCtlFlag(arg string) (api.AgcControlT, error) {
-	switch arg {
+	switch strings.ToLower(arg) {
 	case "disable":
 		return api.AGC_DISABLE, nil
 	case "5":
@@ -131,7 +130,7 @@ func AGCCtlFlag(arg string) (api.AgcControlT, error) {
 	case "enable":
 		return api.AGC_CTRL_EN, nil
 	default:
-		return 0, fmt.Errorf("invalid AGC control value; got %s, want disable|enable|5|50|100", arg)
+		return 0, fmt.Errorf("invalid AGC control value: got %s, want disable|enable|5|50|100", arg)
 	}
 }
 
@@ -144,7 +143,7 @@ AGC set point in dBFS.`
 // AGCSetFlag parses and validates an AGC set point.
 func AGCSetFlag(val int) (int32, error) {
 	if val > 0 {
-		return 0, fmt.Errorf("invalid AGC set point; got %d dBFS, want <= 0", val)
+		return 0, fmt.Errorf("invalid AGC set point: got %d dBFS, want <= 0", val)
 	}
 	return int32(val), nil
 }
@@ -176,7 +175,7 @@ const (
 // DuoTunerFlag parses and validates an RSPduo tuner selection. Valid
 // values are "either", "a", "1", "b", or "2".
 func DuoTunerFlag(arg string) (DuoTunerSelect, error) {
-	switch arg {
+	switch strings.ToLower(arg) {
 	case "either":
 		return DuoTunerFlagEither, nil
 	case "a", "1":
@@ -184,7 +183,7 @@ func DuoTunerFlag(arg string) (DuoTunerSelect, error) {
 	case "b", "2":
 		return DuoTunerFlagB, nil
 	default:
-		return "", fmt.Errorf("invalid duotuner value; got %s, want a|1|b|2|either", arg)
+		return "", fmt.Errorf("invalid duotuner value: got %s, want a|1|b|2|either", arg)
 	}
 }
 
@@ -204,16 +203,36 @@ func SerialsFlag(arg string) ([]api.SerialNumber, error) {
 	if arg == "any" {
 		return serials, nil
 	}
-	// There is no defined spec for serial number format, but it seems
-	// like are only alpha-numeric characters. No spaces or special chars.
-	rx := regexp.MustCompile(`^[[:alnum:]]{1,64}$`)
 	parts := strings.Split(arg, ",")
 	if len(parts) == 0 {
-		return nil, fmt.Errorf("no serials specified; got %s", arg)
+		return nil, fmt.Errorf("no serials specified: got %s", arg)
 	}
-	for _, part := range parts {
-		if !rx.MatchString(part) {
-			return nil, fmt.Errorf("invalid serial; got %s", part)
+	for i, part := range parts {
+		// There is no defined spec for serial number format, but it seems
+		// like they only contain alpha-numeric ASCII characters.
+		if part == "" {
+			return nil, fmt.Errorf("invalid empty serial at %d", i)
+		}
+		if len(part) > api.MAX_SER_NO_LEN {
+			return nil, fmt.Errorf(
+				"serial number %d too long: got %d, want <= %d",
+				i, len(part), api.MAX_SER_NO_LEN,
+			)
+		}
+		for j, c := range part {
+			switch {
+			case c >= '0' && c <= '9':
+				// good
+			case c >= 'a' && c <= 'z':
+				// good
+			case c >= 'A' && c <= 'Z':
+				// good
+			default:
+				return nil, fmt.Errorf(
+					"serial %d has invalid character at %d: got '%s'",
+					i, j, part,
+				)
+			}
 		}
 		serials = append(serials, api.ParseSerialNumber(part))
 	}
@@ -234,7 +253,7 @@ func USBFlag(arg string) (api.TransferModeT, error) {
 	case "bulk":
 		return api.BULK, nil
 	default:
-		return 0, fmt.Errorf("invalid usb mode; got %s, want isoch|bulk", arg)
+		return 0, fmt.Errorf("invalid usb mode: got %s, want isoch|bulk", arg)
 	}
 }
 
@@ -260,7 +279,7 @@ func DxAntFlag(arg string) (api.RspDx_AntennaSelectT, error) {
 	case "c":
 		return api.RspDx_ANTENNA_C, nil
 	default:
-		return 0, fmt.Errorf("invalid RSPdx antenna; got %s, want a|b|c", arg)
+		return 0, fmt.Errorf("invalid RSPdx antenna: got %s, want a|b|c", arg)
 	}
 }
 
@@ -279,6 +298,6 @@ func Rsp2AntFlag(arg string) (api.Rsp2_AntennaSelectT, error) {
 	case "b":
 		return api.Rsp2_ANTENNA_B, nil
 	default:
-		return 0, fmt.Errorf("invalid RSP2 antenna; got %s, want a|b", arg)
+		return 0, fmt.Errorf("invalid RSP2 antenna: got %s, want a|b", arg)
 	}
 }
