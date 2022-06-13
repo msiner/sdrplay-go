@@ -26,7 +26,7 @@ func TestBytesToString(t *testing.T) {
 	for _, spec := range specs {
 		got := bytesToString(spec.b)
 		if got != spec.s {
-			t.Errorf("bad conversion; got %s, want %s", got, spec.s)
+			t.Errorf("bad conversion: got %s, want %s", got, spec.s)
 		}
 	}
 }
@@ -40,7 +40,7 @@ func BenchmarkBytesToString(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		s := bytesToString(buf)
 		if len(s) != 1024 {
-			b.Fatalf("wrong string length; got %d, want 1024", len(s))
+			b.Fatalf("wrong string length: got %d, want 1024", len(s))
 		}
 	}
 }

@@ -48,19 +48,19 @@ func TestWithLowIF(t *testing.T) {
 		err := cfg(dev, params, rx)
 		switch {
 		case err != nil:
-			t.Errorf("%d: unexpected failure; %v", i, err)
+			t.Errorf("%d: unexpected failure: %v", i, err)
 		default:
 			fs := params.DevParams.FsFreq.FsHz
 			if fs != spec.fs {
-				t.Errorf("%d: wrong sample rate; got %v, want %v", i, fs, spec.fs)
+				t.Errorf("%d: wrong sample rate: got %v, want %v", i, fs, spec.fs)
 			}
 			bw := rx.TunerParams.BwType
 			if bw != spec.bw {
-				t.Errorf("%d: wrong bandwidth; got %v, want %v", i, bw, spec.bw)
+				t.Errorf("%d: wrong bandwidth: got %v, want %v", i, bw, spec.bw)
 			}
 			inter := rx.TunerParams.IfType
 			if inter != spec.inter {
-				t.Errorf("%d: wrong IF; got %v, want %v", i, inter, spec.inter)
+				t.Errorf("%d: wrong IF: got %v, want %v", i, inter, spec.inter)
 			}
 		}
 	}
@@ -77,20 +77,20 @@ func TestWithLowIF(t *testing.T) {
 		err := cfg(dev, params, rx)
 		switch {
 		case err != nil:
-			t.Errorf("%d: unexpected failure; %v", i, err)
+			t.Errorf("%d: unexpected failure: %v", i, err)
 		default:
 			// As a secondary, it should not configure the Fs.
 			fs := params.DevParams.FsFreq.FsHz
 			if fs != 0 {
-				t.Errorf("%d: wrong sample rate; got %v, want %v", i, fs, 0)
+				t.Errorf("%d: wrong sample rate: got %v, want %v", i, fs, 0)
 			}
 			bw := rx.TunerParams.BwType
 			if bw != api.BW_1_536 {
-				t.Errorf("%d: wrong bandwidth; got %v, want %v", i, bw, api.BW_1_536)
+				t.Errorf("%d: wrong bandwidth: got %v, want %v", i, bw, api.BW_1_536)
 			}
 			inter := rx.TunerParams.IfType
 			if inter != api.IF_2_048 {
-				t.Errorf("%d: wrong IF; got %v, want %v", i, inter, api.IF_2_048)
+				t.Errorf("%d: wrong IF: got %v, want %v", i, inter, api.IF_2_048)
 			}
 		}
 	}
@@ -107,20 +107,20 @@ func TestWithLowIF(t *testing.T) {
 		err := cfg(dev, params, rx)
 		switch {
 		case err != nil:
-			t.Errorf("%d: unexpected failure; %v", i, err)
+			t.Errorf("%d: unexpected failure: %v", i, err)
 		default:
 			// As a primary, stuck with Fs from DeviceT selection.
 			fs := params.DevParams.FsFreq.FsHz
 			if fs != 8e6 {
-				t.Errorf("%d: wrong sample rate; got %v, want %v", i, fs, 8e6)
+				t.Errorf("%d: wrong sample rate: got %v, want %v", i, fs, 8e6)
 			}
 			bw := rx.TunerParams.BwType
 			if bw != api.BW_1_536 {
-				t.Errorf("%d: wrong bandwidth; got %v, want %v", i, bw, api.BW_1_536)
+				t.Errorf("%d: wrong bandwidth: got %v, want %v", i, bw, api.BW_1_536)
 			}
 			inter := rx.TunerParams.IfType
 			if inter != api.IF_2_048 {
-				t.Errorf("%d: wrong IF; got %v, want %v", i, inter, api.IF_2_048)
+				t.Errorf("%d: wrong IF: got %v, want %v", i, inter, api.IF_2_048)
 			}
 		}
 	}
@@ -137,20 +137,20 @@ func TestWithLowIF(t *testing.T) {
 		err := cfg(dev, params, rx)
 		switch {
 		case err != nil:
-			t.Errorf("%d: unexpected failure; %v", i, err)
+			t.Errorf("%d: unexpected failure: %v", i, err)
 		default:
 			// As primary in dual tuner mode, stuck with Fs from DeviceT selection.
 			fs := params.DevParams.FsFreq.FsHz
 			if fs != 8e6 {
-				t.Errorf("%d: wrong sample rate; got %v, want %v", i, fs, 8e6)
+				t.Errorf("%d: wrong sample rate: got %v, want %v", i, fs, 8e6)
 			}
 			bw := rx.TunerParams.BwType
 			if bw != api.BW_1_536 {
-				t.Errorf("%d: wrong bandwidth; got %v, want %v", i, bw, api.BW_1_536)
+				t.Errorf("%d: wrong bandwidth: got %v, want %v", i, bw, api.BW_1_536)
 			}
 			inter := rx.TunerParams.IfType
 			if inter != api.IF_2_048 {
-				t.Errorf("%d: wrong IF; got %v, want %v", i, inter, api.IF_2_048)
+				t.Errorf("%d: wrong IF: got %v, want %v", i, inter, api.IF_2_048)
 			}
 		}
 	}
@@ -164,7 +164,7 @@ func TestWithLowIF(t *testing.T) {
 		switch i {
 		case 1, 2, 4, 8, 16, 32:
 			if err != nil {
-				t.Errorf("%d: unexpected error; %v", i, err)
+				t.Errorf("%d: unexpected error: %v", i, err)
 			}
 		default:
 			if err == nil {

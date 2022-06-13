@@ -91,7 +91,7 @@ func GetMaxLNAState(d *api.DeviceT, p *api.DeviceParamsT, c *api.RxChannelParams
 func SetLNAState(d *api.DeviceT, p *api.DeviceParamsT, c *api.RxChannelParamsT, val uint8) error {
 	max := GetMaxLNAState(d, p, p.RxChannelA)
 	if val > max {
-		return fmt.Errorf("invalid LNA state; got %d, want <= %d", val, max)
+		return fmt.Errorf("invalid LNA state: got %d, want <= %d", val, max)
 	}
 	c.TunerParams.Gain.LNAstate = uint8(val)
 	return nil
@@ -115,7 +115,7 @@ func GetLNAPercent(d *api.DeviceT, p *api.DeviceParamsT, c *api.RxChannelParamsT
 	max := GetMaxLNAState(d, p, p.RxChannelA)
 	val := c.TunerParams.Gain.LNAstate
 	if val > max {
-		return 0, fmt.Errorf("invalid LNA state; got %d, want <= %d", val, max)
+		return 0, fmt.Errorf("invalid LNA state: got %d, want <= %d", val, max)
 	}
 	return float64(max-val) / float64(max), nil
 }
@@ -129,7 +129,7 @@ func SetLNAPercent(d *api.DeviceT, p *api.DeviceParamsT, c *api.RxChannelParamsT
 		return errors.New("cannot configure nil channel")
 	}
 	if pct < 0 || pct > 1 {
-		return fmt.Errorf("invalid LNA percent; got %f, want 0 <= pct <= 1", pct)
+		return fmt.Errorf("invalid LNA percent: got %f, want 0 <= pct <= 1", pct)
 	}
 	max := GetMaxLNAState(d, p, p.RxChannelA)
 	val := max - uint8(float64(max)*pct)

@@ -44,11 +44,11 @@ func TestWrite(t *testing.T) {
 				t.Fatal(err)
 			}
 			if n != len(want) {
-				t.Fatalf("wrong number of bytes from write; got %d, want %d", n, len(want))
+				t.Fatalf("wrong number of bytes from write: got %d, want %d", n, len(want))
 			}
 			got := buf.Bytes()
 			if !bytes.Equal(got, want) {
-				t.Errorf("wrong bytes after write; got %v, want %v", got, want)
+				t.Errorf("wrong bytes after write: got %v, want %v", got, want)
 			}
 		}
 	})
@@ -77,11 +77,11 @@ func TestFloat32Write(t *testing.T) {
 				t.Fatal(err)
 			}
 			if n != len(want) {
-				t.Fatalf("wrong number of bytes from write; got %d, want %d", n, len(want))
+				t.Fatalf("wrong number of bytes from write: got %d, want %d", n, len(want))
 			}
 			got := buf.Bytes()
 			if !bytes.Equal(got, want) {
-				t.Errorf("wrong bytes after write; got %v, want %v", got, want)
+				t.Errorf("wrong bytes after write: got %v, want %v", got, want)
 			}
 		}
 	})
@@ -110,11 +110,11 @@ func TestComplex64Write(t *testing.T) {
 				t.Fatal(err)
 			}
 			if n != len(want) {
-				t.Fatalf("wrong number of bytes from write; got %d, want %d", n, len(want))
+				t.Fatalf("wrong number of bytes from write: got %d, want %d", n, len(want))
 			}
 			got := buf.Bytes()
 			if !bytes.Equal(got, want) {
-				t.Errorf("wrong bytes after write; got %v, want %v", got, want)
+				t.Errorf("wrong bytes after write: got %v, want %v", got, want)
 			}
 		}
 	})

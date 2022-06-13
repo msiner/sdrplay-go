@@ -50,7 +50,7 @@ func TuneFrequency(arg string) (float64, error) {
 		return 0, err
 	}
 	if freq < 1e3 || freq > 2e9 {
-		return 0, fmt.Errorf("invalid tune frequency; got %f Hz, want 1kHz<=Freq<=2GHz", freq)
+		return 0, fmt.Errorf("invalid tune frequency: got %f Hz, want 1kHz<=Freq<=2GHz", freq)
 	}
 	return freq, nil
 }
@@ -65,7 +65,7 @@ func SampleRate(arg string) (float64, error) {
 		return 0, err
 	}
 	if freq < 2e6 || freq > 10e6 {
-		return 0, fmt.Errorf("invalid sample rate; got %f Hz, want 2MHz<=Rate<=10MHz", freq)
+		return 0, fmt.Errorf("invalid sample rate: got %f Hz, want 2MHz<=Rate<=10MHz", freq)
 	}
 	return freq, nil
 }

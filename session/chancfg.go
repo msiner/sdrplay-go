@@ -138,7 +138,7 @@ func SetTuneFreq(d *api.DeviceT, p *api.DeviceParamsT, c *api.RxChannelParamsT, 
 		return errors.New("cannot configure nil channel")
 	}
 	if freq < 1e3 || freq > 2e9 {
-		return fmt.Errorf("invalid tune frequency; got %f Hz, want 1kHz<=Freq<=2GHz", freq)
+		return fmt.Errorf("invalid tune frequency: got %f Hz, want 1kHz<=Freq<=2GHz", freq)
 	}
 	c.TunerParams.RfFreq.RfHz = freq
 	return nil
@@ -189,7 +189,7 @@ func SetBandwidth(d *api.DeviceT, p *api.DeviceParamsT, c *api.RxChannelParamsT,
 	case api.BW_0_200, api.BW_0_300, api.BW_0_600, api.BW_1_536, api.BW_5_000, api.BW_6_000, api.BW_7_000, api.BW_8_000:
 		// good
 	default:
-		return fmt.Errorf("invalid bandwidth; got %v", bw)
+		return fmt.Errorf("invalid bandwidth: got %v", bw)
 	}
 	c.TunerParams.BwType = bw
 	return nil
@@ -219,7 +219,7 @@ func SetAGC(d *api.DeviceT, p *api.DeviceParamsT, c *api.RxChannelParamsT, en ap
 		return errors.New("cannot configure nil channel")
 	}
 	if set > 0 {
-		return fmt.Errorf("invalid AGC set point; got %d dBFS, want <= 0", set)
+		return fmt.Errorf("invalid AGC set point: got %d dBFS, want <= 0", set)
 	}
 
 	c.CtrlParams.Agc.Enable = en

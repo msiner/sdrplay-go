@@ -100,18 +100,18 @@ func TestWithZeroIF(t *testing.T) {
 		err := cfg(dev, params, rx)
 		switch {
 		case spec.valid && err != nil:
-			t.Errorf("%d: unexpected failure; %v", i, err)
+			t.Errorf("%d: unexpected failure: %v", i, err)
 		case !spec.valid && err == nil:
 			t.Errorf("%d: unexpected success", i)
 		case !spec.valid && err != nil:
 			txt := err.Error()
 			if !strings.Contains(txt, spec.err) {
-				t.Errorf("%d: wrong error message; got '%s', want '%s'", i, txt, spec.err)
+				t.Errorf("%d: wrong error message: got '%s', want '%s'", i, txt, spec.err)
 			}
 		default:
 			bw := rx.TunerParams.BwType
 			if bw != spec.bw {
-				t.Errorf("%d: wrong bandwidth; got %v, want %v", i, bw, spec.bw)
+				t.Errorf("%d: wrong bandwidth: got %v, want %v", i, bw, spec.bw)
 			}
 		}
 	}

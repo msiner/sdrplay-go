@@ -57,6 +57,6 @@ func TestWithDevice(t *testing.T) {
 		}),
 	)
 	if err != nil {
-		t.Errorf("error returned from Run; %v", err)
+		t.Errorf("error returned from Run: %v", err)
 	}
 }

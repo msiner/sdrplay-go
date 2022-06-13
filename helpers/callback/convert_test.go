@@ -20,19 +20,19 @@ func TestConvertToFloat32(t *testing.T) {
 		}
 		floats := convert(samples)
 		if len(floats) != len(samples) {
-			t.Fatalf("float slice has wrong length; got %d, want %d", len(floats), len(samples))
+			t.Fatalf("float slice has wrong length: got %d, want %d", len(floats), len(samples))
 		}
 		var last float32
 		for j := range samples {
 			curr := floats[j]
 			if j != 0 {
 				if curr <= last {
-					t.Fatalf("floats are not monotonically increasing; curr=%f, last=%f", curr, last)
+					t.Fatalf("floats are not monotonically increasing: curr=%f, last=%f", curr, last)
 				}
 			}
 			last = curr
 			if curr < -1 || curr > 1 {
-				t.Fatalf("value outside of range; got %f, want [-1,1]", curr)
+				t.Fatalf("value outside of range: got %f, want [-1,1]", curr)
 			}
 		}
 	}
@@ -51,35 +51,35 @@ func TestConvertToComplex64(t *testing.T) {
 		}
 		cx := convert(xi, xq)
 		if len(cx) != len(xi) {
-			t.Fatalf("float slice has wrong length; got %d, want %d", len(cx), len(xi))
+			t.Fatalf("float slice has wrong length: got %d, want %d", len(cx), len(xi))
 		}
 		var last complex64
 		for j := range cx {
 			curr := cx[j]
 			if j != 0 {
 				if real(curr) <= real(last) {
-					t.Fatalf("floats are not monotonically increasing; curr=%f, last=%f", curr, last)
+					t.Fatalf("floats are not monotonically increasing: curr=%f, last=%f", curr, last)
 				}
 			}
 			last = curr
 			if real(curr) < -1 || real(curr) > 1 {
-				t.Fatalf("real value outside of range; got %f, want [-1,1]", real(curr))
+				t.Fatalf("real value outside of range: got %f, want [-1,1]", real(curr))
 			}
 			if imag(curr) < -1 || imag(curr) > 1 {
-				t.Fatalf("imag value outside of range; got %f, want [-1,1]", imag(curr))
+				t.Fatalf("imag value outside of range: got %f, want [-1,1]", imag(curr))
 			}
 			if (real(curr) + imag(curr)) > 0.00001 {
-				t.Fatalf("imag not negative of real; %v", curr)
+				t.Fatalf("imag not negative of real: %v", curr)
 			}
 		}
 
 		x := convert(xi, xq[:1])
 		if len(x) != 1 {
-			t.Errorf("wrong length on unbalanced convert; got %d, want 1", len(x))
+			t.Errorf("wrong length on unbalanced convert: got %d, want 1", len(x))
 		}
 		x = convert(xi[:2], xq)
 		if len(x) != 2 {
-			t.Errorf("wrong length on unbalanced convert; got %d, want 2", len(x))
+			t.Errorf("wrong length on unbalanced convert: got %d, want 2", len(x))
 		}
 	}
 }

@@ -111,7 +111,7 @@ analog bandwidths of 1.536 MHz, 600 kHz, 300 kHz, and 200 kHz.
 	}
 	// Limitation of standard WAV header format.
 	if numBytes > 4*1024*1024*1024 {
-		return fmt.Errorf("invalid file size; got %d bytes, but WAV has a maximum of 4 GiB", numBytes)
+		return fmt.Errorf("invalid file size: got %d bytes, but WAV has a maximum of 4 GiB", numBytes)
 	}
 
 	dec, err := parse.DecFlag(*decOpt)
@@ -202,15 +202,15 @@ analog bandwidths of 1.536 MHz, 600 kHz, 300 kHz, and 200 kHz.
 	defer func() {
 		dataBytes := totalBytes - uint64(binary.Size(head))
 		numFrames := uint32(dataBytes / uint64(bytesPerSample) / 4)
-		lg.Printf("update WAV header; dataBytes=%d dataFrames=%d", dataBytes, numFrames)
+		lg.Printf("update WAV header: dataBytes=%d dataFrames=%d", dataBytes, numFrames)
 		head.Update(numFrames)
 		out.Flush()
 		_, err = fout.Seek(0, io.SeekStart)
 		if err != nil {
-			lg.Printf("failed to seek back to header; %v", err)
+			lg.Printf("failed to seek back to header: %v", err)
 		}
 		if err := binary.Write(fout, order, head); err != nil {
-			lg.Printf("failed to update header; %v", err)
+			lg.Printf("failed to update header: %v", err)
 		}
 	}()
 
@@ -236,7 +236,7 @@ analog bandwidths of 1.536 MHz, 600 kHz, 300 kHz, and 200 kHz.
 		signal.Notify(sig, os.Interrupt)
 		v, ok := <-sig
 		if ok {
-			lg.Printf("signal; got %v", v)
+			lg.Printf("signal: got %v", v)
 			cancel()
 		}
 	}()
@@ -269,7 +269,7 @@ analog bandwidths of 1.536 MHz, 600 kHz, 300 kHz, and 200 kHz.
 			totalBytes += uint64(n)
 			switch {
 			case err != nil:
-				lg.Printf("write failed, cancel; %v\n", err)
+				lg.Printf("write failed, cancel: %v\n", err)
 				cancel()
 			case totalBytes > numBytes:
 				cancel()
@@ -357,7 +357,7 @@ analog bandwidths of 1.536 MHz, 600 kHz, 300 kHz, and 200 kHz.
 					event.LogMsg(evt, lg)
 					err := event.HandlePowerOverloadChangeMsg(d, a, evt, lg, true)
 					if err != nil {
-						lg.Printf("failed to handle power overload event; %v", err)
+						lg.Printf("failed to handle power overload event: %v", err)
 						cancel()
 					}
 				}
@@ -368,7 +368,7 @@ analog bandwidths of 1.536 MHz, 600 kHz, 300 kHz, and 200 kHz.
 	case nil, context.Canceled:
 		lg.Println("clean exit")
 	default:
-		return fmt.Errorf("error during session run; %v", err)
+		return fmt.Errorf("error during session run: %v", err)
 	}
 
 	return nil

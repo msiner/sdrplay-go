@@ -134,7 +134,7 @@ func WithDxAntennaSelect(ant api.RspDx_AntennaSelectT) DevConfigFn {
 		case api.RspDx_ANTENNA_A, api.RspDx_ANTENNA_B, api.RspDx_ANTENNA_C:
 			// good
 		default:
-			return fmt.Errorf("invalid RSPdx antenna selection; got %v", ant)
+			return fmt.Errorf("invalid RSPdx antenna selection: got %v", ant)
 		}
 		if d.HWVer == api.RSPdx_ID {
 			p.DevParams.RspDxParams.AntennaSel = ant
@@ -151,7 +151,7 @@ func WithRsp2AntennaSelect(ant api.Rsp2_AntennaSelectT) DevConfigFn {
 		case api.Rsp2_ANTENNA_A, api.Rsp2_ANTENNA_B:
 			// good
 		default:
-			return fmt.Errorf("invalid RSP2 antenna selection; got %v", ant)
+			return fmt.Errorf("invalid RSP2 antenna selection: got %v", ant)
 		}
 		if d.HWVer == api.RSP2_ID {
 			p.RxChannelA.Rsp2TunerParams.AntennaSel = ant

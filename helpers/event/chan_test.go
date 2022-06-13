@@ -20,7 +20,7 @@ func TestEventChanSync(t *testing.T) {
 
 	select {
 	case msg := <-ec.C:
-		t.Fatalf("unexpected message; %v", msg)
+		t.Fatalf("unexpected message: %v", msg)
 	default:
 		// Good, message should have been dropped
 	}
@@ -29,7 +29,7 @@ func TestEventChanSync(t *testing.T) {
 
 	select {
 	case msg := <-ec.C:
-		t.Fatalf("unexpected message; %v", msg)
+		t.Fatalf("unexpected message: %v", msg)
 	default:
 		// Good, message should have been dropped
 	}
@@ -51,21 +51,21 @@ func TestEventChanSync(t *testing.T) {
 	case msg := <-ec.C:
 		// MsgNum 0 and 1 were dropped earlier in the test.
 		if msg.MsgNum != 2 {
-			t.Errorf("wrong MsgNum; got %d, want 2", msg.MsgNum)
+			t.Errorf("wrong MsgNum: got %d, want 2", msg.MsgNum)
 		}
 		// Ensure it is not one of the earlier DeviceRemoved messages
 		if msg.EventID != api.PowerOverloadChange {
-			t.Errorf("wrong EventID; got %v, want %v", msg.EventID, api.PowerOverloadChange)
+			t.Errorf("wrong EventID: got %v, want %v", msg.EventID, api.PowerOverloadChange)
 		}
 		if msg.Params.GainParams.CurrGain != params.GainParams.CurrGain {
-			t.Fatalf("wrong params; got %v, want %v", msg.Params.GainParams, msg.Params.GainParams)
+			t.Fatalf("wrong params: got %v, want %v", msg.Params.GainParams, msg.Params.GainParams)
 		}
 	case <-tmr.C:
 		t.Fatal("synchronous event read failed")
 	}
 
 	if err := ec.Close(); err != nil {
-		t.Errorf("unexpected error on close; %v", err)
+		t.Errorf("unexpected error on close: %v", err)
 	}
 
 	err := ec.Close()
@@ -73,12 +73,12 @@ func TestEventChanSync(t *testing.T) {
 		t.Fatalf("no error on double close")
 	}
 	if !strings.Contains(err.Error(), "already closed") {
-		t.Errorf("wrong error message; got '%s', want 'already closed'", err.Error())
+		t.Errorf("wrong error message: got '%s', want 'already closed'", err.Error())
 	}
 
 	select {
 	case msg, ok := <-ec.C:
-		t.Errorf("got unexpected message; %v", msg)
+		t.Errorf("got unexpected message: %v", msg)
 		if !ok {
 			t.Error("chan unexpectedly closed")
 		}
@@ -111,13 +111,13 @@ func TestEventChanAsync(t *testing.T) {
 	select {
 	case msg := <-ec.C:
 		if msg.MsgNum != 0 {
-			t.Errorf("wrong MsgNum; got %d, want 0", msg.MsgNum)
+			t.Errorf("wrong MsgNum: got %d, want 0", msg.MsgNum)
 		}
 		if msg.EventID != api.DeviceRemoved {
-			t.Errorf("wrong EventID; got %v, want %v", msg.EventID, api.DeviceRemoved)
+			t.Errorf("wrong EventID: got %v, want %v", msg.EventID, api.DeviceRemoved)
 		}
 		if msg.Params.GainParams.CurrGain != params.GainParams.CurrGain {
-			t.Fatalf("wrong params; got %v, want %v", msg.Params.GainParams, msg.Params.GainParams)
+			t.Fatalf("wrong params: got %v, want %v", msg.Params.GainParams, msg.Params.GainParams)
 		}
 	default:
 		t.Fatalf("no async message")
@@ -126,13 +126,13 @@ func TestEventChanAsync(t *testing.T) {
 	select {
 	case msg := <-ec.C:
 		if msg.MsgNum != 1 {
-			t.Errorf("wrong MsgNum; got %d, want 1", msg.MsgNum)
+			t.Errorf("wrong MsgNum: got %d, want 1", msg.MsgNum)
 		}
 		if msg.EventID != api.RspDuoModeChange {
-			t.Errorf("wrong EventID; got %v, want %v", msg.EventID, api.RspDuoModeChange)
+			t.Errorf("wrong EventID: got %v, want %v", msg.EventID, api.RspDuoModeChange)
 		}
 		if msg.Params.GainParams.CurrGain != params.GainParams.CurrGain {
-			t.Fatalf("wrong params; got %v, want %v", msg.Params.GainParams, msg.Params.GainParams)
+			t.Fatalf("wrong params: got %v, want %v", msg.Params.GainParams, msg.Params.GainParams)
 		}
 	default:
 		t.Fatalf("no async message")
@@ -141,7 +141,7 @@ func TestEventChanAsync(t *testing.T) {
 	// Channel should be drained by this point.
 	select {
 	case msg := <-ec.C:
-		t.Fatalf("unexpected message; %v", msg)
+		t.Fatalf("unexpected message: %v", msg)
 	default:
 		// Good, message should have been dropped
 	}
@@ -154,10 +154,10 @@ func TestEventChanAsync(t *testing.T) {
 	case msg := <-ec.C:
 		// MsgNum 2 should have been dropped
 		if msg.MsgNum != 3 {
-			t.Errorf("wrong MsgNum; got %d, want 3", msg.MsgNum)
+			t.Errorf("wrong MsgNum: got %d, want 3", msg.MsgNum)
 		}
 		if msg.EventID != api.PowerOverloadChange {
-			t.Errorf("wrong EventID; got %v, want %v", msg.EventID, api.PowerOverloadChange)
+			t.Errorf("wrong EventID: got %v, want %v", msg.EventID, api.PowerOverloadChange)
 		}
 	default:
 		t.Fatalf("no async message")
@@ -166,10 +166,10 @@ func TestEventChanAsync(t *testing.T) {
 	select {
 	case msg := <-ec.C:
 		if msg.MsgNum != 4 {
-			t.Errorf("wrong MsgNum; got %d, want 4", msg.MsgNum)
+			t.Errorf("wrong MsgNum: got %d, want 4", msg.MsgNum)
 		}
 		if msg.EventID != api.RspDuoModeChange {
-			t.Errorf("wrong EventID; got %v, want %v", msg.EventID, api.RspDuoModeChange)
+			t.Errorf("wrong EventID: got %v, want %v", msg.EventID, api.RspDuoModeChange)
 		}
 	default:
 		t.Fatalf("no async message")
@@ -178,13 +178,13 @@ func TestEventChanAsync(t *testing.T) {
 	// Channel should be drained by this point.
 	select {
 	case msg := <-ec.C:
-		t.Fatalf("unexpected message; %v", msg)
+		t.Fatalf("unexpected message: %v", msg)
 	default:
 		// Good, message should have been dropped
 	}
 
 	if err := ec.Close(); err != nil {
-		t.Errorf("unexpected error on close; %v", err)
+		t.Errorf("unexpected error on close: %v", err)
 	}
 
 	err := ec.Close()
@@ -192,6 +192,6 @@ func TestEventChanAsync(t *testing.T) {
 		t.Fatalf("no error on double close")
 	}
 	if !strings.Contains(err.Error(), "already closed") {
-		t.Errorf("wrong error message; got '%s', want 'already closed'", err.Error())
+		t.Errorf("wrong error message: got '%s', want 'already closed'", err.Error())
 	}
 }

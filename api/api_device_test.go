@@ -42,7 +42,7 @@ func TestWithDevice(t *testing.T) {
 
 		devs, err := impl.GetDevices()
 		if err != nil {
-			t.Fatalf("error on GetDevices; %v", err)
+			t.Fatalf("error on GetDevices: %v", err)
 		}
 
 		if len(devs) == 0 {
@@ -63,7 +63,7 @@ func TestWithDevice(t *testing.T) {
 		}
 
 		if err := impl.SelectDevice(dev); err != nil {
-			t.Fatalf("error on SelectDevice; %v", err)
+			t.Fatalf("error on SelectDevice: %v", err)
 		}
 		return dev
 	}
@@ -73,7 +73,7 @@ func TestWithDevice(t *testing.T) {
 
 	params, err := impl.LoadDeviceParams(dev.Dev)
 	if err != nil {
-		t.Fatalf("failed to load device params; %v", err)
+		t.Fatalf("failed to load device params: %v", err)
 	}
 
 	params.DevParams.FsFreq.FsHz = 4e6
@@ -91,7 +91,7 @@ func TestWithDevice(t *testing.T) {
 	c.CtrlParams.Agc.Decay_threshold_dB = 5
 
 	if err := impl.StoreDeviceParams(dev.Dev, params); err != nil {
-		t.Fatalf("failed to store device params; %v", err)
+		t.Fatalf("failed to store device params: %v", err)
 	}
 
 	gotData := make(chan bool, 1)

@@ -220,7 +220,7 @@ func (f *Synchro) StreamBCallback(xi, xq []int16, params *api.StreamCbParamsT, r
 	f.reset = f.reset || reset
 
 	if !f.sync {
-		f.doEvent(SynchroSync, fmt.Sprintf("synchronized; numSamples=%d", len(xi)))
+		f.doEvent(SynchroSync, fmt.Sprintf("synchronized: numSamples=%d", len(xi)))
 	}
 	f.sync = true
 

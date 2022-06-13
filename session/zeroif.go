@@ -16,13 +16,13 @@ import (
 // decimation.
 func GetBestZeroIFBW(fs float64, dec uint8) (api.Bw_MHzT, error) {
 	if fs < 2e6 || fs > 10e6 {
-		return api.BW_Undefined, fmt.Errorf("invalid sample rate; got %f Hz, want 2MHz<=Fs<=10MHz", fs)
+		return api.BW_Undefined, fmt.Errorf("invalid sample rate: got %f Hz, want 2MHz<=Fs<=10MHz", fs)
 	}
 	switch dec {
 	case 1, 2, 4, 8, 16, 32:
 		// good
 	default:
-		return api.BW_Undefined, fmt.Errorf("invalid decimation; got %d, want 1|2|4|8|16|32", dec)
+		return api.BW_Undefined, fmt.Errorf("invalid decimation: got %d, want 1|2|4|8|16|32", dec)
 	}
 	finalFs := fs / float64(dec)
 	switch {
@@ -66,7 +66,7 @@ func SetZeroIF(d *api.DeviceT, p *api.DeviceParamsT, c *api.RxChannelParamsT, fs
 
 	if d.HWVer == api.RSPduo_ID {
 		if d.RspDuoMode != api.RspDuoMode_Single_Tuner {
-			return fmt.Errorf("zero IF only valid for RSPduo single tuner mode; got %v", d.RspDuoMode)
+			return fmt.Errorf("zero IF only valid for RSPduo single tuner mode: got %v", d.RspDuoMode)
 		}
 		if d.Tuner == api.Tuner_Both {
 			return errors.New("zero IF not valid for dual tuner mode")

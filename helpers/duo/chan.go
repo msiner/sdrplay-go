@@ -80,7 +80,7 @@ func (s *SynchroChan) Callback(xia, xqa, xib, xqb []int16, reset bool) {
 
 	numSamples := len(xia)
 	if numSamples != len(xqa) || numSamples != len(xib) || numSamples != len(xqb) {
-		panic(fmt.Sprintf("mismatched buffer lengths; %d, %d, %d, %d", len(xia), len(xqa), len(xib), len(xqb)))
+		panic(fmt.Sprintf("mismatched buffer lengths: %d, %d, %d, %d", len(xia), len(xqa), len(xib), len(xqb)))
 	}
 
 	// Create one big buffer for a single allocation and

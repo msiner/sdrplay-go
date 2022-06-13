@@ -34,19 +34,19 @@ func TestSynchro(t *testing.T) {
 			var want int16
 			for i := range xia {
 				if xia[i] != want {
-					t.Fatalf("wrong value at %d in xia; got %d, want %d", i, xia[i], want)
+					t.Fatalf("wrong value at %d in xia: got %d, want %d", i, xia[i], want)
 				}
 				want++
 				if xqa[i] != want {
-					t.Fatalf("wrong value at %d in xqa; got %d, want %d", i, xqa[i], want)
+					t.Fatalf("wrong value at %d in xqa: got %d, want %d", i, xqa[i], want)
 				}
 				want++
 				if xib[i] != want {
-					t.Fatalf("wrong value at %d in xib; got %d, want %d", i, xib[i], want)
+					t.Fatalf("wrong value at %d in xib: got %d, want %d", i, xib[i], want)
 				}
 				want++
 				if xqb[i] != want {
-					t.Fatalf("wrong value at %d in xqb; got %d, want %d", i, xqb[i], want)
+					t.Fatalf("wrong value at %d in xqb: got %d, want %d", i, xqb[i], want)
 				}
 				want++
 			}
@@ -74,63 +74,63 @@ func TestSynchro(t *testing.T) {
 	f.StreamACallback(xia, xqa, nil, false)
 	f.StreamBCallback(xib, xqb, nil, false)
 	if numResets != 1 {
-		t.Errorf("wrong number of resets; got %d, want 1", numResets)
+		t.Errorf("wrong number of resets: got %d, want 1", numResets)
 	}
 	if numCallbacks != 2 {
-		t.Errorf("wrong number of callbacks; got %d, want 2", numCallbacks)
+		t.Errorf("wrong number of callbacks: got %d, want 2", numCallbacks)
 	}
 	if totalFrames != (numSamples * numCallbacks) {
-		t.Errorf("wrong total number of frames; got %d, want %d", totalFrames, numSamples*numCallbacks)
+		t.Errorf("wrong total number of frames: got %d, want %d", totalFrames, numSamples*numCallbacks)
 	}
 
 	lastEvent = nil
 	f.StreamBCallback(xib, xqb, nil, false)
 	if lastEvent == nil {
-		t.Fatal("expected out of sync event; got none")
+		t.Fatal("expected out of sync event: got none")
 	}
 	switch *lastEvent {
 	case SynchroOutOfSync:
 		want := "A has not been handled"
 		if !strings.Contains(lastMsg, want) {
-			t.Fatalf("wrong event message; got '%s', want '%s'", lastMsg, want)
+			t.Fatalf("wrong event message: got '%s', want '%s'", lastMsg, want)
 		}
 	default:
-		t.Fatalf("wrong event type; got %v, want %v", lastEvent, SynchroOutOfSync)
+		t.Fatalf("wrong event type: got %v, want %v", lastEvent, SynchroOutOfSync)
 	}
 
 	lastEvent = nil
 	f.StreamBCallback(xib, xqb, nil, false)
 	if lastEvent != nil {
-		t.Fatalf("new event when already out of sync; got %v, want none", lastEvent)
+		t.Fatalf("new event when already out of sync: got %v, want none", lastEvent)
 	}
 
 	lastEvent = nil
 	f.StreamACallback(xia, xqa, nil, false)
 	f.StreamBCallback(xib, xqb, nil, false)
 	if lastEvent == nil {
-		t.Fatal("expected sync event; got none")
+		t.Fatal("expected sync event: got none")
 	}
 	switch *lastEvent {
 	case SynchroSync:
 		// good
 	default:
-		t.Fatalf("wrong event type; got %v, want %v", lastEvent, SynchroSync)
+		t.Fatalf("wrong event type: got %v, want %v", lastEvent, SynchroSync)
 	}
 
 	lastEvent = nil
 	f.StreamACallback(xia, xqa, nil, false)
 	f.StreamBCallback(xib[:10], xqb[:10], nil, false)
 	if lastEvent == nil {
-		t.Fatal("expected out of sync event; got none")
+		t.Fatal("expected out of sync event: got none")
 	}
 	switch *lastEvent {
 	case SynchroOutOfSync:
 		want := "numSamplesB=10"
 		if !strings.Contains(lastMsg, want) {
-			t.Fatalf("wrong event message; got '%s', want '%s'", lastMsg, want)
+			t.Fatalf("wrong event message: got '%s', want '%s'", lastMsg, want)
 		}
 	default:
-		t.Fatalf("wrong event type; got %v, want %v", lastEvent, SynchroOutOfSync)
+		t.Fatalf("wrong event type: got %v, want %v", lastEvent, SynchroOutOfSync)
 	}
 
 	f.StreamACallback(xia, xqa, nil, false)
@@ -140,16 +140,16 @@ func TestSynchro(t *testing.T) {
 	f.StreamACallback(xia, xqa, nil, false)
 	f.StreamACallback(xia, xqa, nil, false)
 	if lastEvent == nil {
-		t.Fatal("expected out of sync event; got none")
+		t.Fatal("expected out of sync event: got none")
 	}
 	switch *lastEvent {
 	case SynchroOutOfSync:
 		want := "B has not been handled"
 		if !strings.Contains(lastMsg, want) {
-			t.Fatalf("wrong event message; got '%s', want '%s'", lastMsg, want)
+			t.Fatalf("wrong event message: got '%s', want '%s'", lastMsg, want)
 		}
 	default:
-		t.Fatalf("wrong event type; got %v, want %v", lastEvent, SynchroOutOfSync)
+		t.Fatalf("wrong event type: got %v, want %v", lastEvent, SynchroOutOfSync)
 	}
 
 	f.StreamACallback(xia, xqa, nil, false)
@@ -158,16 +158,16 @@ func TestSynchro(t *testing.T) {
 	lastEvent = nil
 	f.StreamACallback(xia[:10], xqa, nil, false)
 	if lastEvent == nil {
-		t.Fatal("expected out of sync event; got none")
+		t.Fatal("expected out of sync event: got none")
 	}
 	switch *lastEvent {
 	case SynchroOutOfSync:
 		want := "len(xia)=10"
 		if !strings.Contains(lastMsg, want) {
-			t.Fatalf("wrong event message; got '%s', want '%s'", lastMsg, want)
+			t.Fatalf("wrong event message: got '%s', want '%s'", lastMsg, want)
 		}
 	default:
-		t.Fatalf("wrong event type; got %v, want %v", lastEvent, SynchroOutOfSync)
+		t.Fatalf("wrong event type: got %v, want %v", lastEvent, SynchroOutOfSync)
 	}
 
 	f.StreamACallback(xia, xqa, nil, false)
@@ -176,16 +176,16 @@ func TestSynchro(t *testing.T) {
 	lastEvent = nil
 	f.StreamBCallback(xib[:10], xqb, nil, false)
 	if lastEvent == nil {
-		t.Fatal("expected out of sync event; got none")
+		t.Fatal("expected out of sync event: got none")
 	}
 	switch *lastEvent {
 	case SynchroOutOfSync:
 		want := "len(xib)=10"
 		if !strings.Contains(lastMsg, want) {
-			t.Fatalf("wrong event message; got '%s', want '%s'", lastMsg, want)
+			t.Fatalf("wrong event message: got '%s', want '%s'", lastMsg, want)
 		}
 	default:
-		t.Fatalf("wrong event type; got %v, want %v", lastEvent, SynchroOutOfSync)
+		t.Fatalf("wrong event type: got %v, want %v", lastEvent, SynchroOutOfSync)
 	}
 }
 
@@ -205,19 +205,19 @@ func TestSynchroLong(t *testing.T) {
 			func(xia, xqa, xib, xqb []int16, reset bool) {
 				for i := range xia {
 					if xia[i] != wantia {
-						t.Fatalf("wrong value at %d in xia; got %d, want %d", i, xia[i], wantia)
+						t.Fatalf("wrong value at %d in xia: got %d, want %d", i, xia[i], wantia)
 					}
 					wantia++
 					if xqa[i] != wantqa {
-						t.Fatalf("wrong value at %d in xqa; got %d, want %d", i, xqa[i], wantqa)
+						t.Fatalf("wrong value at %d in xqa: got %d, want %d", i, xqa[i], wantqa)
 					}
 					wantqa++
 					if xib[i] != wantib {
-						t.Fatalf("wrong value at %d in xib; got %d, want %d", i, xib[i], wantib)
+						t.Fatalf("wrong value at %d in xib: got %d, want %d", i, xib[i], wantib)
 					}
 					wantib++
 					if xqb[i] != wantqb {
-						t.Fatalf("wrong value at %d in xqb; got %d, want %d", i, xqb[i], wantqb)
+						t.Fatalf("wrong value at %d in xqb: got %d, want %d", i, xqb[i], wantqb)
 					}
 					wantqb++
 				}

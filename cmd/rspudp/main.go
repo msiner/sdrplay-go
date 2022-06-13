@@ -205,7 +205,7 @@ This will use 8 bytes of the specified payload size.`,
 	log.Printf("UDP initialized: local=%v remote=%v", conn.LocalAddr(), conn.RemoteAddr())
 
 	if *payOpt%4 != 0 {
-		return fmt.Errorf("payload size must be multiple of frame size; got %d", *payOpt)
+		return fmt.Errorf("payload size must be multiple of frame size: got %d", *payOpt)
 	}
 
 	log.Printf("Payload Size: %d B", *payOpt)
@@ -231,7 +231,7 @@ This will use 8 bytes of the specified payload size.`,
 		signal.Notify(sig, os.Interrupt)
 		v, ok := <-sig
 		if ok {
-			log.Printf("signal; got %v", v)
+			log.Printf("signal: got %v", v)
 			cancel()
 		}
 	}()
@@ -332,7 +332,7 @@ This will use 8 bytes of the specified payload size.`,
 	case nil, context.Canceled:
 		log.Println("clean exit")
 	default:
-		return fmt.Errorf("error during session run; %v", err)
+		return fmt.Errorf("error during session run: %v", err)
 	}
 
 	return nil

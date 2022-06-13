@@ -37,7 +37,7 @@ func TestStreamChan(t *testing.T) {
 			t.Fatal("stream message channel not ok")
 		}
 		if len(msg.Xi) != numSamples {
-			t.Fatalf("msg payload has wrong length; got %d, want %d", len(msg.Xi), numSamples)
+			t.Fatalf("msg payload has wrong length: got %d, want %d", len(msg.Xi), numSamples)
 		}
 	default:
 		t.Fatal("no message available on chan")
@@ -74,7 +74,7 @@ func TestStreamChan(t *testing.T) {
 	}
 
 	if err := sc.Close(); err != nil {
-		t.Fatalf("unexpected Close failure; %v", err)
+		t.Fatalf("unexpected Close failure: %v", err)
 	}
 
 	sc.Callback(xi, xq, &params, false)
@@ -92,7 +92,7 @@ func TestStreamChan(t *testing.T) {
 		t.Fatal("unexpected double Close success")
 	}
 	if !strings.Contains(err.Error(), "already closed") {
-		t.Fatalf("wrong error message; got '%s', want 'already closed'", err.Error())
+		t.Fatalf("wrong error message: got '%s', want 'already closed'", err.Error())
 	}
 }
 

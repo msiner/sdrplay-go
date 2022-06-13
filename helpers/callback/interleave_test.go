@@ -37,11 +37,11 @@ func TestInterleave(t *testing.T) {
 
 	x := inter(xi, xq[:1])
 	if len(x) != 2 {
-		t.Errorf("wrong length on unbalanced interleave; got %d, want 2", len(x))
+		t.Errorf("wrong length on unbalanced interleave: got %d, want 2", len(x))
 	}
 	x = inter(xi[:1], xq)
 	if len(x) != 2 {
-		t.Errorf("wrong length on unbalanced interleave; got %d, want 2", len(x))
+		t.Errorf("wrong length on unbalanced interleave: got %d, want 2", len(x))
 	}
 }
 

@@ -50,19 +50,19 @@ func TestInterleave(t *testing.T) {
 
 	x := inter(xia[:1], xqa, xib, xqb)
 	if len(x) != scalarsPerFrame {
-		t.Errorf("wrong length on unbalanced interleave; got %d, want %d", len(x), scalarsPerFrame)
+		t.Errorf("wrong length on unbalanced interleave: got %d, want %d", len(x), scalarsPerFrame)
 	}
 	x = inter(xia, xqa[:2], xib, xqb)
 	if len(x) != scalarsPerFrame*2 {
-		t.Errorf("wrong length on unbalanced interleave; got %d, want %d", len(x), scalarsPerFrame)
+		t.Errorf("wrong length on unbalanced interleave: got %d, want %d", len(x), scalarsPerFrame)
 	}
 	x = inter(xia, xqa, xib[:3], xqb)
 	if len(x) != scalarsPerFrame*3 {
-		t.Errorf("wrong length on unbalanced interleave; got %d, want %d", len(x), scalarsPerFrame)
+		t.Errorf("wrong length on unbalanced interleave: got %d, want %d", len(x), scalarsPerFrame)
 	}
 	x = inter(xia, xqa, xib, xqb[:4])
 	if len(x) != scalarsPerFrame*4 {
-		t.Errorf("wrong length on unbalanced interleave; got %d, want %d", len(x), scalarsPerFrame)
+		t.Errorf("wrong length on unbalanced interleave: got %d, want %d", len(x), scalarsPerFrame)
 	}
 }
 

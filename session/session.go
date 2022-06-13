@@ -208,7 +208,7 @@ func (s *Session) Run(ctx context.Context) error {
 		}
 		defer func() {
 			if err := impl.UnlockDeviceApi(); err != nil {
-				fmt.Fprintf(os.Stderr, "UnlockDeviceApi failed; %v", err)
+				fmt.Fprintf(os.Stderr, "UnlockDeviceApi failed: %v", err)
 			}
 		}()
 
@@ -251,7 +251,7 @@ func (s *Session) Run(ctx context.Context) error {
 	}
 	defer func() {
 		if err := impl.ReleaseDevice(dev); err != nil {
-			fmt.Fprintf(os.Stderr, "ReleaseDevice failed; %v", err)
+			fmt.Fprintf(os.Stderr, "ReleaseDevice failed: %v", err)
 		}
 	}()
 
@@ -286,7 +286,7 @@ func (s *Session) Run(ctx context.Context) error {
 	}
 	defer func() {
 		if err := impl.Uninit(dev.Dev); err != nil {
-			fmt.Fprintf(os.Stderr, "Uninit failed; %v", err)
+			fmt.Fprintf(os.Stderr, "Uninit failed: %v", err)
 		}
 	}()
 

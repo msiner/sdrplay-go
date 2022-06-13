@@ -455,7 +455,7 @@ func init() {
 		// For security reasons, the LoadDLL function should only be used
 		// with absolute paths.
 		if !filepath.IsAbs(DLL_PATH) {
-			panic(fmt.Sprintf("DLL_PATH is not absolute, refusing to load DLL; %s", DLL_PATH))
+			panic(fmt.Sprintf("DLL_PATH is not absolute, refusing to load DLL: %s", DLL_PATH))
 		}
 		direct, err := windows.LoadDLL(DLL_PATH)
 		if err != nil {

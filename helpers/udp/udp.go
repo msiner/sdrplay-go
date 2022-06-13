@@ -47,7 +47,7 @@ func NewPacketWriteFn(payloadLen, scalarsPerFrame uint, seqHeader bool, order bi
 	}
 	if dataBytes%scalarsPerFrame != 0 {
 		return nil, fmt.Errorf(
-			"frames will not fit evenly in payload; payloadLen=%d seqHeader=%v scalarsPerFrame=%d",
+			"frames will not fit evenly in payload: payloadLen=%d seqHeader=%v scalarsPerFrame=%d",
 			payloadLen, seqHeader, scalarsPerFrame,
 		)
 	}
@@ -66,7 +66,7 @@ func NewPacketWriteFn(payloadLen, scalarsPerFrame uint, seqHeader bool, order bi
 	}
 	write := func(out io.Writer, x []int16) (int, error) {
 		if len(x)%int(scalarsPerFrame) != 0 {
-			return 0, fmt.Errorf("invalid number of scalars; got %d, want multiple of %d", len(x), scalarsPerFrame)
+			return 0, fmt.Errorf("invalid number of scalars: got %d, want multiple of %d", len(x), scalarsPerFrame)
 		}
 		var total int
 		switch order {

@@ -52,13 +52,13 @@ func TestParseFrequency(t *testing.T) {
 		val, err := Frequency(spec.txt)
 		switch {
 		case spec.valid && err != nil:
-			t.Errorf("parse error on valid input; %v", err)
+			t.Errorf("parse error on valid input: %v", err)
 		case !spec.valid && err != nil:
 			// good
 		case !spec.valid && err == nil:
 			t.Errorf("no error on invalid input %v", spec.txt)
 		case !close(val, spec.want):
-			t.Errorf("wrong parse result; got %v, want %v", val, spec.want)
+			t.Errorf("wrong parse result: got %v, want %v", val, spec.want)
 		default:
 			// good
 		}

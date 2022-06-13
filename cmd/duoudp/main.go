@@ -172,7 +172,7 @@ analog bandwidths of 1.536 MHz, 600 kHz, 300 kHz, and 200 kHz.
 	lg.Printf("UDP initialized: local=%v remote=%v", conn.LocalAddr(), conn.RemoteAddr())
 
 	if *payOpt%4 != 0 {
-		return fmt.Errorf("payload size must be multiple of frame size; got %d", *payOpt)
+		return fmt.Errorf("payload size must be multiple of frame size: got %d", *payOpt)
 	}
 
 	lg.Printf("Payload Size: %d B", *payOpt)
@@ -202,7 +202,7 @@ analog bandwidths of 1.536 MHz, 600 kHz, 300 kHz, and 200 kHz.
 		signal.Notify(sig, os.Interrupt)
 		v, ok := <-sig
 		if ok {
-			lg.Printf("signal; got %v", v)
+			lg.Printf("signal: got %v", v)
 			cancel()
 		}
 	}()
@@ -312,7 +312,7 @@ analog bandwidths of 1.536 MHz, 600 kHz, 300 kHz, and 200 kHz.
 					event.LogMsg(evt, lg)
 					err := event.HandlePowerOverloadChangeMsg(d, a, evt, lg, true)
 					if err != nil {
-						lg.Printf("failed to handle power overload event; %v", err)
+						lg.Printf("failed to handle power overload event: %v", err)
 						cancel()
 					}
 				}
@@ -323,7 +323,7 @@ analog bandwidths of 1.536 MHz, 600 kHz, 300 kHz, and 200 kHz.
 	case nil, context.Canceled:
 		lg.Println("clean exit")
 	default:
-		return fmt.Errorf("error during session run; %v", err)
+		return fmt.Errorf("error during session run: %v", err)
 	}
 
 	return nil

@@ -21,7 +21,7 @@ type Logger interface {
 func GetRelatedParams(d *api.DeviceT, a api.API, e api.EventT, t api.TunerSelectT, p *api.EventParamsT) (*api.DeviceParamsT, []*api.RxChannelParamsT, error) {
 	devParams, err := a.LoadDeviceParams(d.Dev)
 	if err != nil {
-		return nil, nil, fmt.Errorf("failed to get devparams; %v: %v", err, a.GetLastError(d))
+		return nil, nil, fmt.Errorf("failed to get devparams: %v: %v", err, a.GetLastError(d))
 	}
 
 	var rxParams []*api.RxChannelParamsT

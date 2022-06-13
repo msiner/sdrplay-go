@@ -60,7 +60,7 @@ func GetBestLowIFSettings(d *api.DeviceT, strat LowIFStrategy, dec uint8) (float
 	case 1, 2, 4, 8, 16, 32:
 		// good
 	default:
-		return fsRes, bwRes, ifRes, fmt.Errorf("invalid decimation; got %d, want 1|2|4|8|16|32", dec)
+		return fsRes, bwRes, ifRes, fmt.Errorf("invalid decimation: got %d, want 1|2|4|8|16|32", dec)
 	}
 
 	// Maximum final sample rate, after down-conversion, is 2 MHz.

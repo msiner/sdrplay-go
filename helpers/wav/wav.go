@@ -139,7 +139,7 @@ func NewHeader(
 		case 4, 8:
 			// Good
 		default:
-			return nil, fmt.Errorf("invalid bytes per sample for floating point format; got %d, want 4 or 8", bytesPerSample)
+			return nil, fmt.Errorf("invalid bytes per sample for floating point format: got %d, want 4 or 8", bytesPerSample)
 		}
 	case LPCM:
 		head.Fmt.AudioFormat = uint16(LPCM)
@@ -147,10 +147,10 @@ func NewHeader(
 		case 1, 2, 3, 4:
 			// Good
 		default:
-			return nil, fmt.Errorf("invalid bytes per sample for PCM format; got %d, want 1, 2, 3, or 4", bytesPerSample)
+			return nil, fmt.Errorf("invalid bytes per sample for PCM format: got %d, want 1, 2, 3, or 4", bytesPerSample)
 		}
 	default:
-		return nil, fmt.Errorf("invalid sample format; got %d, want LPCM or IEEEFloatingPoint", format)
+		return nil, fmt.Errorf("invalid sample format: got %d, want LPCM or IEEEFloatingPoint", format)
 	}
 	head.Fmt.NumChannels = numChannels
 	head.Fmt.SampleRate = sampleRate

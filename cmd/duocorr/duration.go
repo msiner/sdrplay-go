@@ -29,7 +29,7 @@ func ParseDuration(s string) (time.Duration, error) {
 		return 0, err
 	}
 	if val < 0 {
-		return 0, fmt.Errorf("invalid negative duration value; got %d", val)
+		return 0, fmt.Errorf("invalid negative duration value: got %d", val)
 	}
 	return time.Duration(val) * mult, nil
 }

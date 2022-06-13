@@ -104,7 +104,7 @@ the sample rate.`,
 	}
 	// Limitation of standard WAV header format.
 	if numBytes > 4*1024*1024*1024 {
-		return fmt.Errorf("invalid file size; got %d bytes, but WAV has a maximum of 4 GiB", numBytes)
+		return fmt.Errorf("invalid file size: got %d bytes, but WAV has a maximum of 4 GiB", numBytes)
 	}
 
 	fs, err := parse.FsFlag(*fsOpt)
@@ -240,15 +240,15 @@ the sample rate.`,
 	defer func() {
 		dataBytes := totalBytes - uint64(binary.Size(head))
 		numFrames := uint32(dataBytes / uint64(bytesPerSample) / 2)
-		log.Printf("update WAV header; dataBytes=%d dataFrames=%d", dataBytes, numFrames)
+		log.Printf("update WAV header: dataBytes=%d dataFrames=%d", dataBytes, numFrames)
 		head.Update(numFrames)
 		out.Flush()
 		_, err = fout.Seek(0, io.SeekStart)
 		if err != nil {
-			log.Printf("failed to seek back to header; %v", err)
+			log.Printf("failed to seek back to header: %v", err)
 		}
 		if err := binary.Write(fout, order, head); err != nil {
-			log.Printf("failed to update header; %v", err)
+			log.Printf("failed to update header: %v", err)
 		}
 	}()
 
@@ -273,7 +273,7 @@ the sample rate.`,
 		signal.Notify(sig, os.Interrupt)
 		v, ok := <-sig
 		if ok {
-			log.Printf("signal; got %v", v)
+			log.Printf("signal: got %v", v)
 			cancel()
 		}
 	}()
@@ -354,7 +354,7 @@ the sample rate.`,
 			totalBytes += uint64(n)
 			switch {
 			case err != nil:
-				log.Printf("write failed, cancel; %v\n", err)
+				log.Printf("write failed, cancel: %v\n", err)
 				cancel()
 			case totalBytes > numBytes:
 				cancel()
@@ -385,7 +385,7 @@ the sample rate.`,
 	case nil, context.Canceled:
 		log.Println("clean exit")
 	default:
-		return fmt.Errorf("error during session run; %v", err)
+		return fmt.Errorf("error during session run: %v", err)
 	}
 
 	return nil
